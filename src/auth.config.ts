@@ -10,10 +10,10 @@ export const authConfig = {
       const isAdminRoute = nextUrl.pathname.startsWith("/admin");
       
       if (isAdminRoute) {
-        // Only allow logged in users to access /admin
-        // Note: Specific Role checking (USER vs ADMIN vs OWNER) will be done inside the pages or advanced middleware
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+        if (!isLoggedIn) return false;
+
+        const role = auth?.user?.role as "USER" | "ADMIN" | "OWNER" | undefined;
+        return role === "ADMIN" || role === "OWNER";
       }
       return true; // Allow access to all other routes
     },
@@ -22,13 +22,13 @@ export const authConfig = {
         session.user.id = token.sub;
       }
       if (session.user && token.role) {
-        session.user.role = token.role as any;
+        session.user.role = token.role as "USER" | "ADMIN" | "OWNER";
       }
       return session;
     },
     jwt({ token, user }) {
       if (user) {
-        token.role = user.role as any;
+        token.role = user.role as "USER" | "ADMIN" | "OWNER";
       }
       return token;
     }
