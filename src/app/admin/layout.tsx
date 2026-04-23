@@ -51,17 +51,25 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <span>Store Settings</span>
           </Link>
         </nav>
-        <div className="p-4 border-t">
-          <Link href="/" className="flex items-center space-x-3 text-gray-600 hover:bg-gray-50 p-3 rounded-lg transition-colors font-medium">
-            <Home className="w-5 h-5" />
-            <span>Go to Store</span>
-          </Link>
-          <LogoutButton />
-        </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+      <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 flex flex-col relative">
+        {/* Top Navbar */}
+        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+          <div>
+             <span className="md:hidden font-bold text-gray-900">Admin</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors font-medium">
+              <Home className="w-4 h-4" />
+              <span>Go to Store</span>
+            </Link>
+            <div className="w-px h-5 bg-gray-200"></div>
+            <LogoutButton />
+          </div>
+        </header>
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full max-w-7xl">
           {children}
         </div>

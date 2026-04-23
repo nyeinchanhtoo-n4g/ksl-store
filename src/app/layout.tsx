@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "@/components/storefront/Navbar";
+import Footer from "@/components/storefront/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Script from "next/script";
 
@@ -48,7 +49,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-zinc-950 text-gray-900 dark:text-white">
         <ThemeProvider>
           <Navbar />
-          {children}
+          <div className="flex-1 flex flex-col">
+             {children}
+          </div>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
