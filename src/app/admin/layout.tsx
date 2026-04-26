@@ -42,13 +42,23 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect("/"); 
   }
 
+  const settings = await prisma.storeSettings.findUnique({
+    where: { id: 1 },
+  });
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 flex">
       {/* Sidebar (Desktop) */}
       <aside className="w-64 bg-white dark:bg-zinc-900 shadow-xl flex flex-col hidden md:flex z-10 border-r border-transparent dark:border-zinc-800">
         <div className="p-6 border-b border-gray-200 dark:border-zinc-800">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Admin Panel</h2>
-          <div className="mt-2 text-sm font-medium px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-200 rounded-full inline-block">
+          <div className="flex items-center gap-2 mb-2">
+            {(settings as any)?.logoUrl ? (
+              <img src={(settings as any).logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
+            ) : (
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Admin Panel</h2>
+            )}
+          </div>
+          <div className="text-sm font-medium px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-200 rounded-full inline-block">
             {dbUser.role}
           </div>
         </div>

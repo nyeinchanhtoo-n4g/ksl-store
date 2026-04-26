@@ -9,6 +9,8 @@ import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { auth } from "@/auth";
 import Script from "next/script";
 
+import { prisma } from "@/lib/prisma";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -19,10 +21,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "H²O LEATHER",
-  description: "Premium leather goods storefront",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await prisma.storeSettings.findUnique({
+    where: { id: 1 },
+  });
+
+  return {
+    title: "H²O LEATHER",
+    description: "Premium leather goods storefront",
+    icons: {
+      icon: (settings as any)?.faviconUrl || "/favicon.ico",
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -30,6 +41,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const settings = await prisma.storeSettings.findUnique({
+    where: { id: 1 },
+  });
 
   return (
     <html
@@ -53,7 +67,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-zinc-950 text-gray-900 dark:text-white">
         <NextAuthProvider session={session}>
           <ThemeProvider>
-            <Navbar />
+            <Navbar logoUrl={(settings as any)?.logoUrl} />
             <div className="flex-1 flex flex-col">
                {children}
             </div>

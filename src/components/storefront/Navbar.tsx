@@ -7,8 +7,13 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useIsClient } from "@/lib/useIsClient";
 import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
 
-export default function Navbar() {
+interface NavbarProps {
+  logoUrl?: string | null;
+}
+
+export default function Navbar({ logoUrl }: NavbarProps) {
   const { data: session, status } = useSession();
   const { getTotals } = useCart();
   const totals = getTotals();
@@ -21,8 +26,18 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-lg dark:border-zinc-800 dark:bg-zinc-950/80 transition-colors">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-500">
-          H²O LEATHER
+        <Link href="/" className="flex items-center gap-2">
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="Store Logo"
+              className="h-8 w-auto sm:h-10 object-contain"
+            />
+          ) : (
+            <span className="text-xl sm:text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-500">
+              H²O LEATHER
+            </span>
+          )}
         </Link>
         <div className="flex items-center gap-2 sm:gap-4">
           <ThemeToggle />

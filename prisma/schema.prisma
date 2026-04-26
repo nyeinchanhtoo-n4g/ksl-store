@@ -111,6 +111,8 @@ model OrderItem {
 
 model StoreSettings {
   id            Int      @id @default(1)
+  logoUrl       String?
+  faviconUrl    String?
   telegramUrl   String?
   viberUrl      String?
   updatedAt     DateTime @updatedAt
