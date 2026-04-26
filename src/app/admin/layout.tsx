@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
+import MobileNav from "@/components/admin/MobileNav";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await auth();
@@ -96,8 +97,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-zinc-950 flex flex-col relative">
         {/* Top Navbar */}
         <header className="bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-          <div>
-             <span className="md:hidden font-bold text-gray-900 dark:text-white">Admin</span>
+          <div className="flex items-center gap-4">
+             <MobileNav role={dbUser.role} logoUrl={(settings as any)?.logoUrl} />
+             <span className="md:hidden font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
+               {(settings as any)?.logoUrl ? "Admin" : "Admin Panel"}
+             </span>
           </div>
           <div className="flex items-center space-x-3">
             <Link href="/" className="flex items-center space-x-2 text-sm text-gray-600 dark:text-zinc-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-zinc-800/70 dark:hover:text-white px-3 py-2 rounded-lg transition-colors font-medium">
