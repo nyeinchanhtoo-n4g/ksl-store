@@ -1,22 +1,18 @@
-"use client";
-
-import { useTransition } from "react";
 import { updateProduct } from "@/actions/product.actions";
 import { Product } from "@prisma/client";
+import ImageUploadField from "@/components/admin/ImageUploadField";
 
-export default function EditProductForm({ product }: { product: Product }) {
-  const [isPending, startTransition] = useTransition();
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    startTransition(() => {
-      updateProduct(product.id, formData);
-    });
-  };
+export default function EditProductForm({
+  product,
+  collections,
+}: {
+  product: Product & { collectionId?: string | null };
+  collections: Array<{ id: string; name: string }>;
+}) {
+  const updateProductAction = updateProduct.bind(null, product.id);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form action={updateProductAction} className="space-y-6">
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Product Name</label>
         <input type="text" name="name" id="name" defaultValue={product.name} required className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white" />
@@ -39,17 +35,32 @@ export default function EditProductForm({ product }: { product: Product }) {
       </div>
 
       <div>
-        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Image URL (Optional)</label>
-        <input type="url" name="imageUrl" id="imageUrl" defaultValue={product.imageUrl || ""} placeholder="https://example.com/image.jpg" className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400" />
+        <label htmlFor="collectionId" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Collection</label>
+        <select name="collectionId" id="collectionId" defaultValue={product.collectionId || ""} className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white">
+          <option value="">No Collection</option>
+          {collections.map((collection) => (
+            <option key={collection.id} value={collection.id}>
+              {collection.name}
+            </option>
+          ))}
+        </select>
       </div>
+
+      <ImageUploadField
+        name="imageUrl"
+        label="Product Image"
+        defaultValue={product.imageUrl || ""}
+        placeholder="https://example.com/image.jpg"
+        helperText="Upload directly to Cloudinary or paste an image URL."
+        folder="ksl-project/products"
+      />
 
       <div className="pt-4 flex justify-end">
         <button
           type="submit"
-          disabled={isPending}
           className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
         >
-          {isPending ? "Updating..." : "Update Product"}
+          Update Product
         </button>
       </div>
     </form>

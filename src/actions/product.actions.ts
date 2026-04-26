@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+const db = prisma as any;
+
 export async function createProduct(formData: FormData) {
   const session = await auth();
   if (!session?.user || session.user.role === "USER") {
@@ -16,18 +18,21 @@ export async function createProduct(formData: FormData) {
   const price = parseFloat(formData.get("price") as string);
   const stock = parseInt(formData.get("stock") as string, 10);
   const imageUrl = formData.get("imageUrl") as string | null;
+  const collectionId = (formData.get("collectionId") as string) || null;
 
-  await prisma.product.create({
+  await db.product.create({
     data: {
       name,
       description,
       price,
       stock: isNaN(stock) ? 0 : stock,
-      imageUrl: imageUrl || null
+      imageUrl: imageUrl || null,
+      collectionId,
     }
   });
 
   revalidatePath("/admin/products");
+  revalidatePath("/");
   redirect("/admin/products");
 }
 
@@ -42,19 +47,22 @@ export async function updateProduct(productId: string, formData: FormData) {
   const price = parseFloat(formData.get("price") as string);
   const stock = parseInt(formData.get("stock") as string, 10);
   const imageUrl = formData.get("imageUrl") as string | null;
+  const collectionId = (formData.get("collectionId") as string) || null;
 
-  await prisma.product.update({
+  await db.product.update({
     where: { id: productId },
     data: {
       name,
       description,
       price,
       stock: isNaN(stock) ? 0 : stock,
-      imageUrl: imageUrl || null
+      imageUrl: imageUrl || null,
+      collectionId,
     }
   });
 
   revalidatePath("/admin/products");
+  revalidatePath("/");
   redirect("/admin/products");
 }
 

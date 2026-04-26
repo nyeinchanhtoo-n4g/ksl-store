@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LayoutDashboard, ShoppingBag, ShoppingCart, Users, ShieldCheck, Settings, Home } from "lucide-react";
+import { Menu, X, LayoutDashboard, ShoppingBag, ShoppingCart, Users, ShieldCheck, Settings, Home, Layers3, Images } from "lucide-react";
 
 interface MobileNavProps {
   role: string;
@@ -19,6 +19,8 @@ export default function MobileNav({ role, logoUrl }: MobileNavProps) {
   const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Products", icon: ShoppingBag },
+    { href: "/admin/collections", label: "Collections", icon: Layers3 },
+    { href: "/admin/carousel", label: "Carousel", icon: Images },
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
     ...(role === "OWNER" ? [{ href: "/admin/users", label: "Team Settings", icon: Users }] : []),
     { href: "/admin/profile", label: "Security", icon: ShieldCheck },

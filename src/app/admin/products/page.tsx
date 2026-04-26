@@ -4,8 +4,11 @@ import Link from "next/link";
 import { Plus, Edit2 } from "lucide-react";
 import DeleteProductButton from "./DeleteProductButton";
 
+const db = prisma as any;
+
 export default async function ProductsManagementPage() {
-  const products = await prisma.product.findMany({
+  const products = await db.product.findMany({
+    include: { collection: true },
     orderBy: { createdAt: "desc" }
   });
 
@@ -37,6 +40,7 @@ export default async function ProductsManagementPage() {
                 <thead className="bg-gray-50 dark:bg-zinc-900">
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">Product</th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Collection</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Price (Ks)</th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Stock</th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -47,12 +51,12 @@ export default async function ProductsManagementPage() {
                 <tbody className="divide-y divide-gray-200 dark:divide-zinc-800 bg-white dark:bg-zinc-900">
                   {products.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="py-8 text-center text-gray-500 dark:text-zinc-400">
+                      <td colSpan={5} className="py-8 text-center text-gray-500 dark:text-zinc-400">
                         No products found. Start by adding a new product.
                       </td>
                     </tr>
                   )}
-                  {products.map((product) => (
+                  {products.map((product: any) => (
                     <tr key={product.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
                         <div className="flex items-center">
@@ -69,6 +73,9 @@ export default async function ProductsManagementPage() {
                           )}
                           <span>{product.name}</span>
                         </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-zinc-400">
+                        {product.collection?.name || "Unassigned"}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-zinc-400">{product.price.toLocaleString("en-US")} Ks</td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-zinc-400">

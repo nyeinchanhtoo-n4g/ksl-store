@@ -3,11 +3,18 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import EditProductForm from "./EditProductForm";
 
+const db = prisma as any;
+
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id }
-  });
+  const [product, collections] = await Promise.all([
+    db.product.findUnique({
+      where: { id },
+    }),
+    db.collection.findMany({
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   if (!product) {
     return (
@@ -29,7 +36,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Product</h1>
-        <EditProductForm product={product} />
+        <EditProductForm product={product} collections={collections} />
       </div>
     </div>
   );

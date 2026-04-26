@@ -82,9 +82,34 @@ model Product {
   price       Float
   stock       Int      @default(0)
   imageUrl    String?
+  collectionId String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  collection  Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
   orderItems  OrderItem[]
+}
+
+model Collection {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model CarouselSlide {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?  @db.Text
+  imageUrl    String
+  buttonText  String?
+  buttonHref  String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Order {

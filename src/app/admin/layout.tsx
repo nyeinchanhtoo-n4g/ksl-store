@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import { LayoutDashboard, Users, ShoppingBag, ShoppingCart, Home, Settings, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Users, ShoppingBag, ShoppingCart, Home, Settings, ShieldCheck, Layers3, Images } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -71,6 +71,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <Link href="/admin/products" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
             <ShoppingBag className="w-5 h-5" />
             <span>Products</span>
+          </Link>
+          <Link href="/admin/collections" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+            <Layers3 className="w-5 h-5" />
+            <span>Collections</span>
+          </Link>
+          <Link href="/admin/carousel" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+            <Images className="w-5 h-5" />
+            <span>Carousel</span>
           </Link>
           <Link href="/admin/orders" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
             <ShoppingCart className="w-5 h-5" />
