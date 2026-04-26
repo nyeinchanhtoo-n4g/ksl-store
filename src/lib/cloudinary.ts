@@ -6,19 +6,31 @@ function getCloudinaryEnv() {
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
   if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error("Cloudinary environment variables are missing.");
+    return null;
   }
 
   return { cloudName, apiKey, apiSecret };
 }
 
+export function hasCloudinaryConfig() {
+  return !!getCloudinaryEnv();
+}
+
 export function getCloudinaryUploadUrl() {
-  const { cloudName } = getCloudinaryEnv();
+  const env = getCloudinaryEnv();
+  if (!env) {
+    throw new Error("Cloudinary is not configured.");
+  }
+  const { cloudName } = env;
   return `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 }
 
 export function buildCloudinarySignature(params: Record<string, string | number>) {
-  const { apiSecret } = getCloudinaryEnv();
+  const env = getCloudinaryEnv();
+  if (!env) {
+    throw new Error("Cloudinary is not configured.");
+  }
+  const { apiSecret } = env;
 
   const serialized = Object.entries(params)
     .filter(([, value]) => value !== undefined && value !== null && value !== "")
@@ -30,6 +42,10 @@ export function buildCloudinarySignature(params: Record<string, string | number>
 }
 
 export function getCloudinaryUploadAuth() {
-  const { apiKey } = getCloudinaryEnv();
+  const env = getCloudinaryEnv();
+  if (!env) {
+    throw new Error("Cloudinary is not configured.");
+  }
+  const { apiKey } = env;
   return { apiKey };
 }

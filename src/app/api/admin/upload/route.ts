@@ -4,6 +4,7 @@ import {
   buildCloudinarySignature,
   getCloudinaryUploadAuth,
   getCloudinaryUploadUrl,
+  hasCloudinaryConfig,
 } from "@/lib/cloudinary";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -13,6 +14,16 @@ export async function POST(request: Request) {
 
   if (!session?.user || session.user.role === "USER") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!hasCloudinaryConfig()) {
+    return NextResponse.json(
+      {
+        error:
+          "Cloudinary is not configured. Add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to your .env file.",
+      },
+      { status: 503 }
+    );
   }
 
   try {
