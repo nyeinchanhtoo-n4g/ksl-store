@@ -8,9 +8,10 @@ import { Menu, X, LayoutDashboard, ShoppingBag, ShoppingCart, Users, ShieldCheck
 interface MobileNavProps {
   role: string;
   logoUrl?: string | null;
+  collections?: Array<{ id: string; name: string; slug: string }>;
 }
 
-export default function MobileNav({ role, logoUrl }: MobileNavProps) {
+export default function MobileNav({ role, logoUrl, collections = [] }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
@@ -80,6 +81,26 @@ export default function MobileNav({ role, logoUrl }: MobileNavProps) {
               </Link>
             );
           })}
+
+          {collections.length > 0 && (
+            <div className="mt-6">
+              <p className="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-zinc-500">
+                Collections
+              </p>
+              <div className="mt-2 space-y-1">
+                {collections.map((collection) => (
+                  <Link
+                    key={collection.id}
+                    href={`/admin/products?collection=${collection.slug}`}
+                    onClick={() => setIsOpen(false)}
+                    className="block rounded-lg px-3 py-2 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                  >
+                    {collection.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </nav>
 
         <div className="p-4 border-t border-gray-100 dark:border-zinc-800">

@@ -6,9 +6,22 @@ import DeleteProductButton from "./DeleteProductButton";
 
 const db = prisma as any;
 
-export default async function ProductsManagementPage() {
+export default async function ProductsManagementPage(props: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  const selectedCollection =
+    typeof searchParams?.collection === "string" ? searchParams.collection : "";
+
   const products = await db.product.findMany({
     include: { collection: true },
+    where: selectedCollection
+      ? {
+          collection: {
+            slug: selectedCollection,
+          },
+        }
+      : undefined,
     orderBy: { createdAt: "desc" }
   });
 
@@ -20,8 +33,21 @@ export default async function ProductsManagementPage() {
           <p className="mt-2 text-sm text-gray-700 dark:text-zinc-300">
             Manage your store&apos;s products. Add new items, update their prices and stock, or edit details.
           </p>
+          {selectedCollection && (
+            <p className="mt-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+              Filtering by collection: {selectedCollection}
+            </p>
+          )}
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          {selectedCollection && (
+            <Link
+              href="/admin/products"
+              className="mr-3 inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              Clear Filter
+            </Link>
+          )}
           <Link
             href="/admin/products/new"
             className="flex items-center space-x-2 rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"

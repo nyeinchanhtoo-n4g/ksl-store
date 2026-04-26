@@ -41,9 +41,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  const settings = await prisma.storeSettings.findUnique({
-    where: { id: 1 },
-  });
+  const [settings, collections] = await Promise.all([
+    prisma.storeSettings.findUnique({
+      where: { id: 1 },
+    }),
+    (prisma as any).collection.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+  ]);
 
   return (
     <html
@@ -67,7 +73,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-zinc-950 text-gray-900 dark:text-white">
         <NextAuthProvider session={session}>
           <ThemeProvider>
-            <Navbar logoUrl={(settings as any)?.logoUrl} />
+            <Navbar logoUrl={(settings as any)?.logoUrl} collections={collections} />
             <div className="flex-1 flex flex-col">
                {children}
             </div>

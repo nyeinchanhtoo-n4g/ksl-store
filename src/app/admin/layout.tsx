@@ -46,6 +46,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const settings = await prisma.storeSettings.findUnique({
     where: { id: 1 },
   });
+  const collections = await (prisma as any).collection.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, slug: true },
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-zinc-950 text-gray-900 dark:text-zinc-100 flex">
@@ -76,6 +80,19 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <Layers3 className="w-5 h-5" />
             <span>Collections</span>
           </Link>
+          {collections.length > 0 && (
+            <div className="space-y-1 pl-3">
+              {collections.map((collection: any) => (
+                <Link
+                  key={collection.id}
+                  href={`/admin/products?collection=${collection.slug}`}
+                  className="block rounded-lg px-3 py-2 text-sm text-gray-600 transition hover:bg-blue-50 hover:text-blue-700 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-white"
+                >
+                  {collection.name}
+                </Link>
+              ))}
+            </div>
+          )}
           <Link href="/admin/carousel" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
             <Images className="w-5 h-5" />
             <span>Carousel</span>
@@ -106,7 +123,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         {/* Top Navbar */}
         <header className="bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
-             <MobileNav role={dbUser.role} logoUrl={(settings as any)?.logoUrl} />
+             <MobileNav role={dbUser.role} logoUrl={(settings as any)?.logoUrl} collections={collections} />
              <span className="md:hidden font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
                {(settings as any)?.logoUrl ? "Admin" : "Admin Panel"}
              </span>
