@@ -11,7 +11,7 @@ export default function RoleSelect({ userId, currentRole }: { userId: string, cu
     startTransition(async () => {
       try {
         await updateUserRole(userId, newRole);
-      } catch (error) {
+      } catch {
         alert("Failed to update role. Are you sure you're the OWNER?");
       }
     });

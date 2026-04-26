@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import ProductCard from "@/components/storefront/ProductCard";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 export default async function HomePage(props: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -33,7 +32,7 @@ export default async function HomePage(props: {
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-lg dark:text-green-100">Order Placed Successfully!</h3>
-                  <p className="text-sm mt-0.5 opacity-90">Thank you for your purchase. We've received your order and will contact you shortly.</p>
+                  <p className="text-sm mt-0.5 opacity-90">Thank you for your purchase. We&apos;ve received your order and will contact you shortly.</p>
                 </div>
               </div>
             </div>

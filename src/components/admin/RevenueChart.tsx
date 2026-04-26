@@ -35,7 +35,8 @@ export default function RevenueChart({ data }: { data: { date: string, revenue: 
           />
           <Tooltip 
             contentStyle={{ borderRadius: '12px', border: '1px solid #f3f4f6', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-            formatter={(value: number) => [`${value.toLocaleString()} Ks`, "Revenue"]}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            formatter={(value: any) => [`${Number(value || 0).toLocaleString()} Ks`, "Revenue"]}
           />
           <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
         </AreaChart>

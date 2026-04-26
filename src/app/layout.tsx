@@ -5,6 +5,8 @@ import "./globals.css";
 import Navbar from "@/components/storefront/Navbar";
 import Footer from "@/components/storefront/Footer";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
+import { auth } from "@/auth";
 import Script from "next/script";
 
 const geistSans = Geist({
@@ -18,15 +20,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KSL Store",
-  description: "Premium E-Commerce Storefront",
+  title: "H²O LEATHER",
+  description: "Premium leather goods storefront",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html
       lang="en"
@@ -37,23 +41,25 @@ export default function RootLayout({
         <Script id="theme-checker" strategy="beforeInteractive">
           {`
             try {
-              if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark')
-              } else {
+              if (localStorage.theme === 'light') {
                 document.documentElement.classList.remove('dark')
+              } else {
+                document.documentElement.classList.add('dark')
               }
             } catch (_) {}
           `}
         </Script>
       </head>
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-zinc-950 text-gray-900 dark:text-white">
-        <ThemeProvider>
-          <Navbar />
-          <div className="flex-1 flex flex-col">
-             {children}
-          </div>
-          <Footer />
-        </ThemeProvider>
+        <NextAuthProvider session={session}>
+          <ThemeProvider>
+            <Navbar />
+            <div className="flex-1 flex flex-col">
+               {children}
+            </div>
+            <Footer />
+          </ThemeProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

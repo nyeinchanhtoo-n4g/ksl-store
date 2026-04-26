@@ -4,31 +4,33 @@ export const authConfig = {
   pages: {
     signIn: "/login",
   },
+  session: { strategy: "jwt" },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isAdminRoute = nextUrl.pathname.startsWith("/admin");
       
       if (isAdminRoute) {
-        if (!isLoggedIn) return false;
-
-        const role = auth?.user?.role as "USER" | "ADMIN" | "OWNER" | undefined;
-        return role === "ADMIN" || role === "OWNER";
+        if (!isLoggedIn) {
+          return false;
+        }
+        return true; 
       }
-      return true; // Allow access to all other routes
+      return true;
     },
     session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-      }
-      if (session.user && token.role) {
-        session.user.role = token.role as "USER" | "ADMIN" | "OWNER";
+      if (session.user) {
+        session.user.id = (token.id as string) || (token.sub as string);
+        if (token.role) {
+          session.user.role = token.role as "USER" | "ADMIN" | "OWNER";
+        }
       }
       return session;
     },
     jwt({ token, user }) {
       if (user) {
-        token.role = user.role as "USER" | "ADMIN" | "OWNER";
+        token.role = user.role;
+        token.id = user.id;
       }
       return token;
     }

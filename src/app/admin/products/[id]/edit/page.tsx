@@ -27,7 +27,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Product</h1>
         <EditProductForm product={product} />
       </div>

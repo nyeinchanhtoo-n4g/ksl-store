@@ -65,17 +65,22 @@ export async function placeGuestOrder(
       },
     });
 
-    for (const item of items) {
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { stock: { decrement: item.quantity } },
-      });
-    }
+    // Bulk update stock to minimize round trips inside transaction
+    await Promise.all(
+      items.map((item) =>
+        tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } },
+        })
+      )
+    );
 
     return createdOrder;
+  }, {
+    timeout: 15000, // Increase transaction timeout to 15 seconds
   });
 
-  // Fetch settings for Telegram and Messenger URLs
+  // Fetch settings for Telegram and Viber URLs
   const settings = await prisma.storeSettings.findUnique({
     where: { id: 1 },
   });
@@ -90,11 +95,9 @@ export async function placeGuestOrder(
     // Basic formatting for telegram `https://t.me/bot?text=hello`
     const baseUrl = settings.telegramUrl.split("?")[0];
     redirectUrl = `${baseUrl}?text=${encodedText}`;
-  } else if (contactInfo.method === "messenger" && settings?.messengerUrl) {
-    // Messenger uses m.me
-    // Note: It's harder to pass custom pre-filled text in Messenger safely via regular links cross-platform,
-    // but we link directly to the page. 
-    redirectUrl = settings.messengerUrl;
+  } else if (contactInfo.method === "viber" && settings?.viberUrl) {
+    // Viber deep links vary by platform; we store a working URL in settings and redirect to it.
+    redirectUrl = settings.viberUrl;
   } else {
     // Fallback if settings not configured
     redirectUrl = `/?orderSuccess=true`;

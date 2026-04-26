@@ -8,7 +8,6 @@ import { authConfig } from "./auth.config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -19,8 +18,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string }
+        const email = (credentials.email as string).trim();
+        const user = await prisma.user.findFirst({
+          where: { 
+            email: {
+              equals: email,
+              mode: 'insensitive'
+            }
+          }
         });
 
         if (!user || !user.password) return null;

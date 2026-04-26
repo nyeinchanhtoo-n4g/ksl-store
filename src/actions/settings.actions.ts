@@ -11,12 +11,12 @@ export async function updateStoreSettings(formData: FormData) {
   }
 
   const telegramUrl = formData.get("telegramUrl") as string;
-  const messengerUrl = formData.get("messengerUrl") as string;
+  const viberUrl = formData.get("viberUrl") as string;
 
   await prisma.storeSettings.upsert({
     where: { id: 1 },
-    update: { telegramUrl, messengerUrl },
-    create: { id: 1, telegramUrl, messengerUrl },
+    update: { telegramUrl, viberUrl },
+    create: { id: 1, telegramUrl, viberUrl },
   });
 
   revalidatePath("/admin/settings");

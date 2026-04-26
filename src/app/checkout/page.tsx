@@ -2,26 +2,24 @@
 
 import { useCart } from "@/store/useCart";
 import { placeGuestOrder } from "@/actions/order.actions";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useIsClient } from "@/lib/useIsClient";
 
 export default function CheckoutPage() {
   const { items, getTotals, clearCart } = useCart();
   const totals = getTotals();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const isClient = useIsClient();
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (isClient && items.length === 0) router.replace("/cart");
+  }, [items.length, router, isClient]);
 
-  if (!mounted) return null;
+  if (!isClient) return null;
 
-  if (items.length === 0) {
-    router.push("/cart");
-    return null;
-  }
+  if (items.length === 0) return null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,7 +43,7 @@ export default function CheckoutPage() {
       const result = await placeGuestOrder(contactInfo, orderItems, totals.totalPrice);
       if (result.success) {
         clearCart();
-        window.location.href = result.redirectUrl;
+        window.location.assign(result.redirectUrl);
       }
     } catch (error) {
       console.error(error);
@@ -74,24 +72,26 @@ export default function CheckoutPage() {
           </div>
           <div>
              <span className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Continue Order Via</span>
-             <div className="flex gap-4">
+             <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" name="method" value="telegram" defaultChecked className="text-blue-600 focus:ring-blue-500" />
                   <span className="text-gray-900 dark:text-white">Telegram</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="method" value="messenger" className="text-blue-600 focus:ring-blue-500" />
-                  <span className="text-gray-900 dark:text-white">Messenger</span>
+                  <input type="radio" name="method" value="viber" className="text-blue-600 focus:ring-blue-500" />
+                  <span className="text-gray-900 dark:text-white">Viber</span>
                 </label>
              </div>
           </div>
           
-          <div className="pt-6 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between">
-            <span className="text-lg font-medium text-gray-900 dark:text-white">Total: {totals.totalPrice.toLocaleString()} Ks</span>
+          <div className="pt-6 border-t border-gray-200 dark:border-zinc-800 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-lg font-medium text-gray-900 dark:text-white">
+              Total: {totals.totalPrice.toLocaleString()} Ks
+            </span>
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+              className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? "Processing..." : "Place Order"}
             </button>

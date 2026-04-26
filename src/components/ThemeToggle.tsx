@@ -2,17 +2,13 @@
 
 import { useTheme } from "./ThemeProvider";
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useIsClient } from "@/lib/useIsClient";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const isClient = useIsClient();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
+  if (!isClient) {
     return <div className="w-9 h-9" />;
   }
 
