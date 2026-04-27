@@ -46,7 +46,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const settings = await prisma.storeSettings.findUnique({
     where: { id: 1 },
   });
-  const collections = await (prisma as any).collection.findMany({
+  const collections = await prisma.collection.findMany({
     orderBy: { name: "asc" },
     select: { id: true, name: true, slug: true },
   });
@@ -57,8 +57,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <aside className="w-64 bg-white dark:bg-zinc-900 shadow-xl flex flex-col hidden md:flex z-10 border-r border-transparent dark:border-zinc-800">
         <div className="p-6 border-b border-gray-200 dark:border-zinc-800">
           <div className="flex items-center gap-2 mb-2">
-            {(settings as any)?.logoUrl ? (
-              <img src={(settings as any).logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
+            {settings?.logoUrl ? (
+              <img src={settings.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
             ) : (
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Admin Panel</h2>
             )}
@@ -82,7 +82,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </Link>
           {collections.length > 0 && (
             <div className="space-y-1 pl-3">
-              {collections.map((collection: any) => (
+              {collections.map((collection) => (
                 <Link
                   key={collection.id}
                   href={`/admin/products?collection=${collection.slug}`}
@@ -123,9 +123,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         {/* Top Navbar */}
         <header className="bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
-             <MobileNav role={dbUser.role} logoUrl={(settings as any)?.logoUrl} collections={collections} />
+             <MobileNav role={dbUser.role} logoUrl={settings?.logoUrl} collections={collections} />
              <span className="md:hidden font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
-               {(settings as any)?.logoUrl ? "Admin" : "Admin Panel"}
+               {settings?.logoUrl ? "Admin" : "Admin Panel"}
              </span>
           </div>
           <div className="flex items-center space-x-3">

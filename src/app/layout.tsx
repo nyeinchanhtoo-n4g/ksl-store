@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "H²O LEATHER",
     description: "Premium leather goods storefront",
     icons: {
-      icon: (settings as any)?.faviconUrl || "/favicon.ico",
+      icon: settings?.faviconUrl || "/favicon.ico",
     },
   };
 }
@@ -45,7 +45,7 @@ export default async function RootLayout({
     prisma.storeSettings.findUnique({
       where: { id: 1 },
     }),
-    (prisma as any).collection.findMany({
+    prisma.collection.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true, slug: true },
     }),
@@ -73,7 +73,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-zinc-950 text-gray-900 dark:text-white">
         <NextAuthProvider session={session}>
           <ThemeProvider>
-            <Navbar logoUrl={(settings as any)?.logoUrl} collections={collections} />
+            <Navbar logoUrl={settings?.logoUrl} collections={collections} />
             <div className="flex-1 flex flex-col">
                {children}
             </div>

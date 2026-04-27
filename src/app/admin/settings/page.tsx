@@ -7,12 +7,10 @@ export default async function SettingsPage() {
     where: { id: 1 },
   });
 
-  const displaySettings = settings || { 
-    logoUrl: "", 
-    faviconUrl: "", 
-    telegramUrl: "", 
-    viberUrl: "" 
-  };
+  const logoUrl = settings?.logoUrl ?? "";
+  const faviconUrl = settings?.faviconUrl ?? "";
+  const telegramUrl = settings?.telegramUrl ?? "";
+  const viberUrl = settings?.viberUrl ?? "";
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -27,7 +25,7 @@ export default async function SettingsPage() {
             <ImageUploadField
               name="logoUrl"
               label="Store Logo URL"
-              defaultValue={(displaySettings as any).logoUrl || ""}
+              defaultValue={logoUrl}
               placeholder="https://example.com/logo.png"
               helperText="Visible in the Navbar and checkout."
               folder="ksl-project/settings"
@@ -36,7 +34,7 @@ export default async function SettingsPage() {
             <ImageUploadField
               name="faviconUrl"
               label="Favicon URL"
-              defaultValue={(displaySettings as any).faviconUrl || ""}
+              defaultValue={faviconUrl}
               placeholder="https://example.com/favicon.ico"
               helperText="Visible in the browser tab."
               folder="ksl-project/settings"
@@ -52,7 +50,7 @@ export default async function SettingsPage() {
                 type="url"
                 name="telegramUrl"
                 id="telegramUrl"
-                defaultValue={displaySettings.telegramUrl || ""}
+                defaultValue={telegramUrl}
                 placeholder="https://t.me/your_bot"
                 className="block w-full rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800/80 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 sm:text-sm py-2.5 px-3"
               />
@@ -69,7 +67,7 @@ export default async function SettingsPage() {
                 type="url"
                 name="viberUrl"
                 id="viberUrl"
-                defaultValue={displaySettings.viberUrl || ""}
+                defaultValue={viberUrl}
                 placeholder="viber://chat?number=959xxxxxxxxx"
                 className="block w-full rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800/80 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 sm:text-sm py-2.5 px-3"
               />

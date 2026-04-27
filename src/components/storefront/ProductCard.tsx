@@ -2,7 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { Product } from "@prisma/client";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
   return (
     <Link href={`/products/${product.id}`} className="group block overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-700">
       <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
@@ -11,6 +17,7 @@ export default function ProductCard({ product }: { product: Product }) {
             src={product.imageUrl}
             alt={product.name}
             fill
+            priority={priority}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition-transform duration-700 group-hover:scale-110"
           />

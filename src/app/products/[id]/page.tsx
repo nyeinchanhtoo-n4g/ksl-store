@@ -25,6 +25,7 @@ export default async function ProductDetailPage(props: {
               src={product.imageUrl}
               alt={product.name}
               fill
+              priority
               className="object-cover"
             />
           ) : (

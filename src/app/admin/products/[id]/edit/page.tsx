@@ -3,15 +3,13 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import EditProductForm from "./EditProductForm";
 
-const db = prisma as any;
-
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const [product, collections] = await Promise.all([
-    db.product.findUnique({
+    prisma.product.findUnique({
       where: { id },
     }),
-    db.collection.findMany({
+    prisma.collection.findMany({
       orderBy: { name: "asc" },
     }),
   ]);

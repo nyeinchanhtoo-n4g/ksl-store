@@ -5,11 +5,10 @@ import {
   updateCarouselSlide,
 } from "@/actions/admin.actions";
 import ImageUploadField from "@/components/admin/ImageUploadField";
-
-const db = prisma as any;
+import type { CarouselSlide } from "@prisma/client";
 
 export default async function CarouselManagementPage() {
-  const slides = await db.carouselSlide.findMany({
+  const slides: CarouselSlide[] = await prisma.carouselSlide.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
 
@@ -85,7 +84,7 @@ export default async function CarouselManagementPage() {
             No slides yet. Add your first hero slide above.
           </div>
         ) : (
-          slides.map((slide: any) => {
+          slides.map((slide) => {
             const updateAction = updateCarouselSlide.bind(null, slide.id);
             const deleteAction = deleteCarouselSlide.bind(null, slide.id);
 

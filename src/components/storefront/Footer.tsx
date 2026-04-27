@@ -14,13 +14,28 @@ export default function Footer() {
     <footer className="w-full py-6 mt-auto border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-          &copy; {new Date().getFullYear()} H²O LEATHER. All rights reserved.
+          Copyright &copy; {new Date().getFullYear()} <a href="https://www.h2oleather.com/" target="_blank" rel="noreferrer">H²O LEATHER</a>. All rights reserved.
+          <br />
+          Develop &amp; Design By{" "}
+          <a
+            href="mailto:nch.mm.dev@gmail.com"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-gray-700 hover:text-blue-600 dark:text-zinc-300 dark:hover:text-blue-400"
+          >
+            N3R0 (N4G)
+          </a>
+          <br />
+          Contact to Developer : {" "}
+          <a
+            href="tel:09423000211"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-gray-700 hover:text-blue-600 dark:text-zinc-300 dark:hover:text-blue-400"
+          >
+            Call Me
+          </a>
         </p>
-        <div className="flex justify-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
-          <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Contact Support</a>
-        </div>
       </div>
     </footer>
   );

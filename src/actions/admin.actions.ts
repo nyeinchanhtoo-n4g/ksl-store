@@ -4,8 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-const db = prisma as any;
-
 async function requireOwnerOrAdmin() {
   const session = await auth();
 
@@ -50,7 +48,7 @@ export async function createCollection(formData: FormData) {
     throw new Error("Collection name is required.");
   }
 
-  await db.collection.create({
+  await prisma.collection.create({
     data: {
       name,
       slug: slugify(name),
@@ -72,7 +70,7 @@ export async function updateCollection(collectionId: string, formData: FormData)
     throw new Error("Collection name is required.");
   }
 
-  await db.collection.update({
+  await prisma.collection.update({
     where: { id: collectionId },
     data: {
       name,
@@ -89,7 +87,7 @@ export async function updateCollection(collectionId: string, formData: FormData)
 export async function deleteCollection(collectionId: string) {
   await requireOwnerOrAdmin();
 
-  await db.collection.delete({
+  await prisma.collection.delete({
     where: { id: collectionId },
   });
 
@@ -113,7 +111,7 @@ export async function createCarouselSlide(formData: FormData) {
     throw new Error("Slide title and image URL are required.");
   }
 
-  await db.carouselSlide.create({
+  await prisma.carouselSlide.create({
     data: {
       title,
       subtitle: subtitle || null,
@@ -144,7 +142,7 @@ export async function updateCarouselSlide(slideId: string, formData: FormData) {
     throw new Error("Slide title and image URL are required.");
   }
 
-  await db.carouselSlide.update({
+  await prisma.carouselSlide.update({
     where: { id: slideId },
     data: {
       title,
@@ -164,7 +162,7 @@ export async function updateCarouselSlide(slideId: string, formData: FormData) {
 export async function deleteCarouselSlide(slideId: string) {
   await requireOwnerOrAdmin();
 
-  await db.carouselSlide.delete({
+  await prisma.carouselSlide.delete({
     where: { id: slideId },
   });
 

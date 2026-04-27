@@ -3,11 +3,10 @@ import { prisma } from "@/lib/prisma";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-
-const db = prisma as any;
+import type { Collection } from "@prisma/client";
 
 export default async function NewProductPage() {
-  const collections = await db.collection.findMany({
+  const collections: Collection[] = await prisma.collection.findMany({
     orderBy: { name: "asc" },
   });
 
@@ -49,7 +48,7 @@ export default async function NewProductPage() {
             <label htmlFor="collectionId" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Collection</label>
             <select name="collectionId" id="collectionId" className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white">
               <option value="">No Collection</option>
-              {collections.map((collection: any) => (
+              {collections.map((collection) => (
                 <option key={collection.id} value={collection.id}>
                   {collection.name}
                 </option>

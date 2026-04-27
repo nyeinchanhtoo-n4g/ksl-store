@@ -5,8 +5,6 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-const db = prisma as any;
-
 export async function createProduct(formData: FormData) {
   const session = await auth();
   if (!session?.user || session.user.role === "USER") {
@@ -20,7 +18,7 @@ export async function createProduct(formData: FormData) {
   const imageUrl = formData.get("imageUrl") as string | null;
   const collectionId = (formData.get("collectionId") as string) || null;
 
-  await db.product.create({
+  await prisma.product.create({
     data: {
       name,
       description,
@@ -49,7 +47,7 @@ export async function updateProduct(productId: string, formData: FormData) {
   const imageUrl = formData.get("imageUrl") as string | null;
   const collectionId = (formData.get("collectionId") as string) || null;
 
-  await db.product.update({
+  await prisma.product.update({
     where: { id: productId },
     data: {
       name,

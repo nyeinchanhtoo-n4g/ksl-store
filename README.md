@@ -40,7 +40,7 @@
 1. ပရောဂျက် clone လုပ်ပါ
 ```bash
 git clone <repository-url>
-cd ksl-project-antigravity
+cd ksl-project
 ```
 
 2. Dependencies များ install လုပ်ပါ

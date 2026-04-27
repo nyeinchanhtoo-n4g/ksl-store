@@ -2,8 +2,15 @@ import { prisma } from "@/lib/prisma";
 import HomeCarousel from "@/components/storefront/HomeCarousel";
 import ProductCard from "@/components/storefront/ProductCard";
 import Link from "next/link";
+import type { CarouselSlide, Prisma, Product } from "@prisma/client";
 
-const db = prisma as any;
+type ProductWithCollection = Prisma.ProductGetPayload<{
+  include: { collection: true };
+}>;
+
+type CollectionWithProducts = Prisma.CollectionGetPayload<{
+  include: { products: true };
+}>;
 
 export default async function HomePage(props: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -12,12 +19,12 @@ export default async function HomePage(props: {
   const isOrderSuccess = searchParams?.orderSuccess === "true";
 
   const [products, collections, slides] = await Promise.all([
-    db.product.findMany({
+    prisma.product.findMany({
       include: { collection: true },
       orderBy: { createdAt: "desc" },
       take: 24,
     }),
-    db.collection.findMany({
+    prisma.collection.findMany({
       include: {
         products: {
           orderBy: { createdAt: "desc" },
@@ -26,16 +33,21 @@ export default async function HomePage(props: {
       },
       orderBy: { name: "asc" },
     }),
-    db.carouselSlide.findMany({
+    prisma.carouselSlide.findMany({
       where: { isActive: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       take: 8,
     }),
   ]);
 
+  const typedProducts = products as ProductWithCollection[];
+  const typedCollections = collections as CollectionWithProducts[];
+  const typedSlides = slides as CarouselSlide[];
+  const aboveFoldProductId = typedProducts.find((product) => product.imageUrl)?.id ?? null;
+
   const carouselItems =
-    slides.length > 0
-      ? slides.map((slide: any) => ({
+    typedSlides.length > 0
+      ? typedSlides.map((slide) => ({
           id: slide.id,
           title: slide.title,
           description: slide.subtitle || "Discover our latest curated arrivals.",
@@ -43,10 +55,10 @@ export default async function HomePage(props: {
           buttonText: slide.buttonText || "Explore Now",
           buttonHref: slide.buttonHref || "#products",
         }))
-      : products
-          .filter((product: any) => product.imageUrl)
+      : typedProducts
+          .filter((product) => product.imageUrl)
           .slice(0, 5)
-          .map((product: any) => ({
+          .map((product) => ({
             id: product.id,
             title: product.name,
             description: product.description,
@@ -56,10 +68,12 @@ export default async function HomePage(props: {
             meta: `${product.price.toLocaleString()} Ks`,
           }));
 
-  const populatedCollections = collections.filter(
-    (collection: any) => collection.products.length > 0
+  const populatedCollections = typedCollections.filter(
+    (collection) => collection.products.length > 0
   );
-  const unassignedProducts = products.filter((product: any) => !product.collectionId);
+  const unassignedProducts: Product[] = typedProducts.filter(
+    (product) => !product.collectionId
+  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -118,7 +132,7 @@ export default async function HomePage(props: {
 
           {populatedCollections.length > 0 && (
             <div className="mb-10 flex flex-wrap gap-3">
-              {populatedCollections.map((collection: any) => (
+              {populatedCollections.map((collection) => (
                 <Link
                   key={collection.id}
                   href={`#collection-${collection.slug}`}
@@ -144,7 +158,7 @@ export default async function HomePage(props: {
             </div>
           ) : (
             <div className="space-y-20">
-              {populatedCollections.map((collection: any) => (
+              {populatedCollections.map((collection) => (
                 <section key={collection.id} id={`collection-${collection.slug}`}>
                   <div className="mb-8">
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -157,8 +171,12 @@ export default async function HomePage(props: {
                     )}
                   </div>
                   <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                    {collection.products.map((product: any) => (
-                      <ProductCard key={product.id} product={product} />
+                    {collection.products.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        priority={product.id === aboveFoldProductId}
+                      />
                     ))}
                   </div>
                 </section>
@@ -172,8 +190,12 @@ export default async function HomePage(props: {
                     </h3>
                   </div>
                   <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                    {unassignedProducts.map((product: any) => (
-                      <ProductCard key={product.id} product={product} />
+                    {unassignedProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        priority={product.id === aboveFoldProductId}
+                      />
                     ))}
                   </div>
                 </section>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { loginAction } from "@/actions/auth.actions";
 import Link from "next/link";
 import { LogIn, Mail, Lock, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { signIn } from "next-auth/react";

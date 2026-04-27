@@ -3,8 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Plus, Edit2 } from "lucide-react";
 import DeleteProductButton from "./DeleteProductButton";
+import type { Prisma } from "@prisma/client";
 
-const db = prisma as any;
+type ProductWithCollection = Prisma.ProductGetPayload<{
+  include: { collection: true };
+}>;
 
 export default async function ProductsManagementPage(props: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -13,7 +16,7 @@ export default async function ProductsManagementPage(props: {
   const selectedCollection =
     typeof searchParams?.collection === "string" ? searchParams.collection : "";
 
-  const products = await db.product.findMany({
+  const products: ProductWithCollection[] = await prisma.product.findMany({
     include: { collection: true },
     where: selectedCollection
       ? {
@@ -82,7 +85,7 @@ export default async function ProductsManagementPage(props: {
                       </td>
                     </tr>
                   )}
-                  {products.map((product: any) => (
+                  {products.map((product) => (
                     <tr key={product.id}>
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
                         <div className="flex items-center">

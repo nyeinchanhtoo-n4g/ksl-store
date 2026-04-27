@@ -4,11 +4,18 @@ import {
   deleteCollection,
   updateCollection,
 } from "@/actions/admin.actions";
+import type { Prisma } from "@prisma/client";
 
-const db = prisma as any;
+type CollectionWithCount = Prisma.CollectionGetPayload<{
+  include: {
+    _count: {
+      select: { products: true };
+    };
+  };
+}>;
 
 export default async function CollectionsPage() {
-  const collections = await db.collection.findMany({
+  const collections: CollectionWithCount[] = await prisma.collection.findMany({
     include: {
       _count: {
         select: { products: true },
@@ -57,7 +64,7 @@ export default async function CollectionsPage() {
             No collections yet. Create your first collection above.
           </div>
         ) : (
-          collections.map((collection: any) => {
+          collections.map((collection) => {
             const updateAction = updateCollection.bind(null, collection.id);
             const deleteAction = deleteCollection.bind(null, collection.id);
 
