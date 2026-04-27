@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 import MobileNav from "@/components/admin/MobileNav";
+import Image from "next/image";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await auth();
@@ -58,7 +59,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div className="p-6 border-b border-gray-200 dark:border-zinc-800">
           <div className="flex items-center gap-2 mb-2">
             {settings?.logoUrl ? (
-              <img src={settings.logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
+              <Image
+                src={settings.logoUrl}
+                alt="Logo"
+                width={160}
+                height={32}
+                className="h-8 w-auto object-contain"
+              />
             ) : (
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Admin Panel</h2>
             )}

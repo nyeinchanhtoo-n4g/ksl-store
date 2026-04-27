@@ -14,6 +14,11 @@ export async function createProduct(formData: FormData) {
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const price = parseFloat(formData.get("price") as string);
+  const originalPriceRaw = formData.get("originalPrice") as string | null;
+  const originalPrice =
+    originalPriceRaw && originalPriceRaw.trim().length > 0
+      ? parseFloat(originalPriceRaw)
+      : null;
   const stock = parseInt(formData.get("stock") as string, 10);
   const imageUrl = formData.get("imageUrl") as string | null;
   const collectionId = (formData.get("collectionId") as string) || null;
@@ -23,6 +28,7 @@ export async function createProduct(formData: FormData) {
       name,
       description,
       price,
+      originalPrice: originalPrice !== null && !isNaN(originalPrice) ? originalPrice : null,
       stock: isNaN(stock) ? 0 : stock,
       imageUrl: imageUrl || null,
       collectionId,
@@ -43,6 +49,11 @@ export async function updateProduct(productId: string, formData: FormData) {
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const price = parseFloat(formData.get("price") as string);
+  const originalPriceRaw = formData.get("originalPrice") as string | null;
+  const originalPrice =
+    originalPriceRaw && originalPriceRaw.trim().length > 0
+      ? parseFloat(originalPriceRaw)
+      : null;
   const stock = parseInt(formData.get("stock") as string, 10);
   const imageUrl = formData.get("imageUrl") as string | null;
   const collectionId = (formData.get("collectionId") as string) || null;
@@ -53,6 +64,7 @@ export async function updateProduct(productId: string, formData: FormData) {
       name,
       description,
       price,
+      originalPrice: originalPrice !== null && !isNaN(originalPrice) ? originalPrice : null,
       stock: isNaN(stock) ? 0 : stock,
       imageUrl: imageUrl || null,
       collectionId,

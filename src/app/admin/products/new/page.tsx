@@ -35,7 +35,22 @@ export default async function NewProductPage() {
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Price (Ks)</label>
+              <label htmlFor="originalPrice" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">
+                Original Price (Ks)
+              </label>
+              <input
+                type="number"
+                name="originalPrice"
+                id="originalPrice"
+                min="0"
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400"
+                placeholder="20000"
+              />
+            </div>
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">
+                Sale Price (Ks)
+              </label>
               <input type="number" name="price" id="price" min="0" required className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400" placeholder="15000" />
             </div>
             <div>

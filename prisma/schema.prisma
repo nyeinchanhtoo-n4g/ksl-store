@@ -80,6 +80,7 @@ model Product {
   name        String
   description String   @db.Text
   price       Float
+  originalPrice Float?
   stock       Int      @default(0)
   imageUrl    String?
   collectionId String?

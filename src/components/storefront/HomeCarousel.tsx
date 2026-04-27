@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type CarouselItem = {
   id: string;
@@ -49,10 +50,13 @@ export default function HomeCarousel({
 
   return (
     <section className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-black">
-      <img
+      <Image
         src={activeItem.imageUrl}
         alt={activeItem.title}
-        className="absolute inset-0 h-full w-full object-cover"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
       />
       <div className="absolute inset-0 bg-black/45" />
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/10" />

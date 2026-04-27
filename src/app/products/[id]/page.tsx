@@ -15,6 +15,10 @@ export default async function ProductDetailPage(props: {
     notFound();
   }
 
+  const isOnSale =
+    typeof product.originalPrice === "number" &&
+    product.originalPrice > product.price;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 xl:gap-x-16">
@@ -33,6 +37,11 @@ export default async function ProductDetailPage(props: {
               No Image Available
             </div>
           )}
+          {isOnSale && (
+            <span className="absolute left-4 top-4 rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white shadow-sm">
+              Sale
+            </span>
+          )}
         </div>
 
         {/* Product Info */}
@@ -43,6 +52,11 @@ export default async function ProductDetailPage(props: {
 
           <div className="mt-3">
             <h2 className="sr-only">Product information</h2>
+            {isOnSale && (
+              <p className="text-lg font-semibold text-gray-400 line-through dark:text-zinc-500">
+                {product.originalPrice!.toLocaleString()} Ks
+              </p>
+            )}
             <p className="text-3xl font-bold text-gray-900 dark:text-white">
               {product.price.toLocaleString()} Ks
             </p>

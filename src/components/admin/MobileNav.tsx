@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, LayoutDashboard, ShoppingBag, ShoppingCart, Users, ShieldCheck, Settings, Home, Layers3, Images } from "lucide-react";
+import Image from "next/image";
 
 interface MobileNavProps {
   role: string;
@@ -51,7 +52,13 @@ export default function MobileNav({ role, logoUrl, collections = [] }: MobileNav
         <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {logoUrl ? (
-              <img src={logoUrl} alt="Logo" className="h-8 w-auto object-contain" />
+              <Image
+                src={logoUrl}
+                alt="Logo"
+                width={160}
+                height={32}
+                className="h-8 w-auto object-contain"
+              />
             ) : (
               <span className="font-bold text-xl text-gray-900 dark:text-white">Admin Panel</span>
             )}

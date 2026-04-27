@@ -6,6 +6,7 @@ import {
 } from "@/actions/admin.actions";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import type { CarouselSlide } from "@prisma/client";
+import Image from "next/image";
 
 export default async function CarouselManagementPage() {
   const slides: CarouselSlide[] = await prisma.carouselSlide.findMany({
@@ -93,8 +94,14 @@ export default async function CarouselManagementPage() {
                 key={slide.id}
                 className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
               >
-                <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 dark:border-zinc-800">
-                  <img src={slide.imageUrl} alt={slide.title} className="h-48 w-full object-cover" />
+                <div className="relative mb-4 h-48 overflow-hidden rounded-xl border border-gray-200 dark:border-zinc-800">
+                  <Image
+                    src={slide.imageUrl}
+                    alt={slide.title}
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                  />
                 </div>
 
                 <form action={updateAction} className="grid gap-4 lg:grid-cols-2">

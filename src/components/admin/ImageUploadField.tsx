@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useRef, useState } from "react";
 import { Upload, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 interface ImageUploadFieldProps {
   name: string;
@@ -99,7 +100,13 @@ export default function ImageUploadField({
 
       {value && (
         <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-2 dark:border-zinc-700 dark:bg-zinc-900">
-          <img src={value} alt={label} className="h-24 w-auto max-w-full object-contain" />
+          <Image
+            src={value}
+            alt={label}
+            width={320}
+            height={96}
+            className="h-24 w-auto max-w-full object-contain"
+          />
         </div>
       )}
     </div>

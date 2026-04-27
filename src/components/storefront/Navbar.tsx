@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShoppingCart,
   LogOut,
@@ -106,7 +107,13 @@ export default function Navbar({ logoUrl, collections = [] }: NavbarProps) {
             className="flex items-center gap-2"
           >
             {logoUrl ? (
-              <img src={logoUrl} alt="Store Logo" className="h-8 w-auto object-contain" />
+              <Image
+                src={logoUrl}
+                alt="Store Logo"
+                width={160}
+                height={32}
+                className="h-8 w-auto object-contain"
+              />
             ) : (
               <span className="text-lg font-bold tracking-tight text-blue-600 dark:text-blue-500">
                 H²O LEATHER
@@ -226,9 +233,11 @@ export default function Navbar({ logoUrl, collections = [] }: NavbarProps) {
 
               <Link href="/" className="hidden md:flex items-center gap-2">
                 {logoUrl ? (
-                  <img
+                  <Image
                     src={logoUrl}
                     alt="Store Logo"
+                    width={200}
+                    height={40}
                     className="h-8 w-auto sm:h-10 object-contain"
                   />
                 ) : (
@@ -242,7 +251,13 @@ export default function Navbar({ logoUrl, collections = [] }: NavbarProps) {
             <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
               <Link href="/" className="flex items-center gap-2">
                 {logoUrl ? (
-                  <img src={logoUrl} alt="Store Logo" className="h-8 w-auto object-contain" />
+                  <Image
+                    src={logoUrl}
+                    alt="Store Logo"
+                    width={160}
+                    height={32}
+                    className="h-8 w-auto object-contain"
+                  />
                 ) : (
                   <span className="text-lg font-bold tracking-tight text-blue-600 dark:text-blue-500">
                     H²O LEATHER
