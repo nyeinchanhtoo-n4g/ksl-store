@@ -12,6 +12,8 @@ const ORDER_STATUSES: OrderStatus[] = [
   'DELIVERED',
   'CANCELLED',
 ];
+const CONTACT_METHODS = new Set(['telegram', 'viber']);
+const PHONE_PATTERN = /^[+\d][\d\s-]{5,24}$/;
 
 type GuestContactInfo = {
   name: string;
@@ -69,10 +71,26 @@ function normalizeContactInfo(contactInfo: GuestContactInfo) {
   const name = contactInfo.name?.trim();
   const phone = contactInfo.phone?.trim();
   const address = contactInfo.address?.trim();
-  const method = contactInfo.method === 'viber' ? 'viber' : 'telegram';
+  const method = contactInfo.method?.trim().toLowerCase() || '';
 
   if (!name || !phone || !address) {
     throw new Error('Name, phone, and address are required.');
+  }
+
+  if (name.length < 2 || name.length > 80) {
+    throw new Error('Name must be between 2 and 80 characters.');
+  }
+
+  if (!PHONE_PATTERN.test(phone)) {
+    throw new Error('Please enter a valid phone number.');
+  }
+
+  if (address.length < 8 || address.length > 500) {
+    throw new Error('Address must be between 8 and 500 characters.');
+  }
+
+  if (!CONTACT_METHODS.has(method)) {
+    throw new Error('Please choose Telegram or Viber.');
   }
 
   return { name, phone, address, method };
