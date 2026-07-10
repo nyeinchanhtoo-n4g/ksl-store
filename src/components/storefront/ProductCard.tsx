@@ -1,6 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-import { Product } from "@prisma/client";
+import Image from 'next/image';
+import Link from 'next/link';
+import { Product } from '@prisma/client';
 
 type ProductWithOptionalOriginalPrice = Product & { originalPrice?: number | null };
 
@@ -12,11 +12,15 @@ export default function ProductCard({
   priority?: boolean;
 }) {
   const originalPriceNumber =
-    typeof product.originalPrice === "number" ? product.originalPrice : null;
+    typeof product.originalPrice === 'number' ? product.originalPrice : null;
   const isOnSale = originalPriceNumber !== null && originalPriceNumber > product.price;
+  const isSoldOut = product.stock <= 0;
 
   return (
-    <Link href={`/products/${product.id}`} className="group block overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-700">
+    <Link
+      href={`/products/${product.id}`}
+      className="group block overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 dark:bg-zinc-900 dark:border-zinc-800 dark:hover:border-zinc-700"
+    >
       <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
         {product.imageUrl ? (
           <Image
@@ -30,16 +34,18 @@ export default function ProductCard({
         ) : (
           <span className="text-gray-400 font-medium">No Image</span>
         )}
-        {isOnSale && (
+        {isSoldOut ? (
+          <span className="absolute left-3 top-3 rounded-full bg-gray-900 px-3 py-1 text-xs font-semibold text-white shadow-sm dark:bg-white dark:text-gray-900">
+            Sold Out
+          </span>
+        ) : isOnSale ? (
           <span className="absolute left-3 top-3 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
             Sale
           </span>
-        )}
+        ) : null}
       </div>
       <div className="p-6">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
-          {product.name}
-        </h3>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">{product.name}</h3>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
           {product.description}
         </p>
@@ -54,8 +60,14 @@ export default function ProductCard({
               {product.price.toLocaleString()} Ks
             </p>
           </div>
-          <span className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 group-hover:opacity-80 transition-opacity">
-            View Details &rarr;
+          <span
+            className={`text-sm font-semibold transition-opacity group-hover:opacity-80 ${
+              isSoldOut
+                ? 'text-gray-500 dark:text-zinc-400'
+                : 'text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400'
+            }`}
+          >
+            {isSoldOut ? 'Unavailable' : 'View Details →'}
           </span>
         </div>
       </div>

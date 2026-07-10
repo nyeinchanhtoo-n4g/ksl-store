@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { Product } from "@prisma/client";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { Product } from '@prisma/client';
 
 export interface CartItem {
   product: Product;
@@ -22,17 +22,21 @@ export const useCart = create<CartState>()(
       items: [],
       addItem: (product, quantity = 1) =>
         set((state) => {
+          if (product.stock <= 0) return state;
+
           const existing = state.items.find((item) => item.product.id === product.id);
           if (existing) {
             return {
               items: state.items.map((item) =>
                 item.product.id === product.id
-                  ? { ...item, quantity: item.quantity + quantity }
+                  ? { ...item, quantity: Math.min(product.stock, item.quantity + quantity) }
                   : item
               ),
             };
           }
-          return { items: [...state.items, { product, quantity }] };
+          return {
+            items: [...state.items, { product, quantity: Math.min(product.stock, quantity) }],
+          };
         }),
       removeItem: (productId) =>
         set((state) => ({
@@ -40,9 +44,13 @@ export const useCart = create<CartState>()(
         })),
       updateQuantity: (productId, quantity) =>
         set((state) => ({
-          items: state.items.map((item) =>
-            item.product.id === productId ? { ...item, quantity } : item
-          ),
+          items: state.items
+            .map((item) =>
+              item.product.id === productId
+                ? { ...item, quantity: Math.min(item.product.stock, Math.max(1, quantity)) }
+                : item
+            )
+            .filter((item) => item.product.stock > 0),
         })),
       clearCart: () => set({ items: [] }),
       getTotals: () => {
@@ -58,7 +66,7 @@ export const useCart = create<CartState>()(
       },
     }),
     {
-      name: "ecommerce-cart",
+      name: 'ecommerce-cart',
     }
   )
 );
