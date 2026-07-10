@@ -11,11 +11,12 @@ export default function CheckoutPage() {
   const totals = getTotals();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
   const isClient = useIsClient();
 
   useEffect(() => {
-    if (isClient && items.length === 0) router.replace('/cart');
-  }, [items.length, router, isClient]);
+    if (isClient && items.length === 0 && !orderPlaced) router.replace('/cart');
+  }, [items.length, router, isClient, orderPlaced]);
 
   if (!isClient) return null;
 
@@ -24,6 +25,7 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    const contactWindow = window.open('', '_blank');
 
     const formData = new FormData(e.currentTarget);
     const contactInfo = {
@@ -41,10 +43,21 @@ export default function CheckoutPage() {
     try {
       const result = await placeGuestOrder(contactInfo, orderItems);
       if (result.success) {
+        setOrderPlaced(true);
+        const successUrl = `/order-success/${result.orderId}`;
+
+        if (result.redirectUrl.startsWith('/')) {
+          contactWindow?.close();
+        } else if (contactWindow) {
+          contactWindow.opener = null;
+          contactWindow.location.href = result.redirectUrl;
+        }
+
         clearCart();
-        window.location.assign(result.redirectUrl);
+        router.push(successUrl);
       }
     } catch (error) {
+      contactWindow?.close();
       console.error(error);
       alert('Failed to place order. Please try again.');
     } finally {
