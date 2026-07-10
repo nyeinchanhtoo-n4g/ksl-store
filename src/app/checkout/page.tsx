@@ -42,7 +42,7 @@ export default function CheckoutPage() {
       const result = await placeGuestOrder(contactInfo, orderItems);
       if (result.success) {
         clearCart();
-        router.push(`/order-success/${result.orderId}`);
+        window.location.assign(result.redirectUrl);
       }
     } catch (error) {
       console.error(error);

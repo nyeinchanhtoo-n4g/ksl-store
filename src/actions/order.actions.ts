@@ -224,7 +224,7 @@ export async function placeGuestOrder(contactInfo: GuestContactInfo, items: Gues
     redirectUrl = settings.viberUrl;
   } else {
     // Fallback if settings not configured
-    redirectUrl = `/?orderSuccess=true`;
+    redirectUrl = `/order-success/${order.id}`;
   }
 
   return { success: true, orderId: order.id, redirectUrl };
