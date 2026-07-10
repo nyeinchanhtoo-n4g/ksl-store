@@ -209,5 +209,5 @@ export async function placeGuestOrder(contactInfo: GuestContactInfo, items: Gues
     redirectUrl = `/?orderSuccess=true`;
   }
 
-  return { success: true, redirectUrl };
+  return { success: true, orderId: order.id, redirectUrl };
 }
