@@ -12,49 +12,17 @@ type CollectionWithProducts = Prisma.CollectionGetPayload<{
   include: { products: true };
 }>;
 
-function getStringParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] || '' : value || '';
-}
-
 export default async function HomePage(props: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const searchParams = props.searchParams ? await props.searchParams : {};
   const isOrderSuccess = searchParams?.orderSuccess === 'true';
-  const query = getStringParam(searchParams?.q).trim();
-  const selectedCollection = getStringParam(searchParams?.collection).trim();
-  const selectedSort = getStringParam(searchParams?.sort).trim();
-  const hasActiveProductFilters = Boolean(query || selectedCollection || selectedSort);
-  const productWhere: Prisma.ProductWhereInput = {
-    ...(query
-      ? {
-          OR: [
-            { name: { contains: query, mode: 'insensitive' } },
-            { description: { contains: query, mode: 'insensitive' } },
-          ],
-        }
-      : {}),
-    ...(selectedCollection
-      ? {
-          collection: {
-            slug: selectedCollection,
-          },
-        }
-      : {}),
-  };
-  const productOrderBy: Prisma.ProductOrderByWithRelationInput =
-    selectedSort === 'price-asc'
-      ? { price: 'asc' }
-      : selectedSort === 'price-desc'
-        ? { price: 'desc' }
-        : { createdAt: 'desc' };
 
   const [products, collections, slides] = await Promise.all([
     prisma.product.findMany({
-      where: productWhere,
       include: { collection: true },
-      orderBy: productOrderBy,
-      take: hasActiveProductFilters ? 48 : 24,
+      orderBy: { createdAt: 'desc' },
+      take: 24,
     }),
     prisma.collection.findMany({
       include: {
@@ -168,62 +136,12 @@ export default async function HomePage(props: {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-left mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl relative inline-block">
-              {hasActiveProductFilters ? 'Products' : 'Shop By Collection'}
+              Shop By Collection
               <div className="absolute -bottom-3 left-0 w-1/3 h-1 bg-blue-600 rounded-full"></div>
             </h2>
           </div>
 
-          <form
-            action="/"
-            className="mb-8 grid gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 md:grid-cols-[1fr_220px_180px_auto]"
-          >
-            <input
-              type="search"
-              name="q"
-              defaultValue={query}
-              placeholder="Search products"
-              className="min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
-            />
-            <select
-              name="collection"
-              defaultValue={selectedCollection}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
-            >
-              <option value="">All collections</option>
-              {typedCollections.map((collection) => (
-                <option key={collection.id} value={collection.slug}>
-                  {collection.name}
-                </option>
-              ))}
-            </select>
-            <select
-              name="sort"
-              defaultValue={selectedSort}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
-            >
-              <option value="">Newest first</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-            </select>
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                className="flex-1 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 md:flex-none"
-              >
-                Search
-              </button>
-              {hasActiveProductFilters && (
-                <Link
-                  href="/#products"
-                  className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                >
-                  Clear
-                </Link>
-              )}
-            </div>
-          </form>
-
-          {!hasActiveProductFilters && populatedCollections.length > 0 && (
+          {populatedCollections.length > 0 && (
             <div className="mb-10 flex flex-wrap gap-3">
               {populatedCollections.map((collection) => (
                 <Link
@@ -245,29 +163,11 @@ export default async function HomePage(props: {
             </div>
           )}
 
-          {typedProducts.length === 0 ? (
+          {products.length === 0 ? (
             <div className="p-12 text-center bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm">
               <p className="text-gray-500 dark:text-gray-400">
-                {hasActiveProductFilters
-                  ? 'No products match your search.'
-                  : 'No products available yet. Run the seeder to populate realistic data.'}
+                No products available yet. Run the seeder to populate realistic data.
               </p>
-            </div>
-          ) : hasActiveProductFilters ? (
-            <div>
-              <p className="mb-8 text-sm text-gray-600 dark:text-zinc-400">
-                Showing {typedProducts.length} product{typedProducts.length === 1 ? '' : 's'}
-                {query ? ` for "${query}"` : ''}.
-              </p>
-              <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                {typedProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    priority={product.id === aboveFoldProductId}
-                  />
-                ))}
-              </div>
             </div>
           ) : (
             <div className="space-y-20">
