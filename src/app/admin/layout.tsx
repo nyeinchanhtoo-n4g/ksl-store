@@ -1,54 +1,50 @@
-import { ReactNode } from "react";
-import Link from "next/link";
-import { LayoutDashboard, Users, ShoppingBag, ShoppingCart, Home, Settings, ShieldCheck, Layers3, Images } from "lucide-react";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import LogoutButton from "@/components/LogoutButton";
-import MobileNav from "@/components/admin/MobileNav";
-import Image from "next/image";
+import { ReactNode } from 'react';
+import Link from 'next/link';
+import {
+  LayoutDashboard,
+  Users,
+  ShoppingBag,
+  ShoppingCart,
+  Home,
+  Settings,
+  ShieldCheck,
+  Layers3,
+  Images,
+} from 'lucide-react';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
+import { redirect } from 'next/navigation';
+import LogoutButton from '@/components/LogoutButton';
+import MobileNav from '@/components/admin/MobileNav';
+import Image from 'next/image';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect("/login");
+    redirect('/login');
   }
 
   // Fetch the latest user data from DB to ensure role is up to date
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { role: true, email: true }
+    select: { role: true, email: true },
   });
 
   if (!dbUser) {
-    redirect("/login");
-  }
-
-  // Auto-promote the first user to OWNER if no OWNER exists in the system
-  const ownerCount = await prisma.user.count({
-    where: { role: "OWNER" }
-  });
-
-  if (ownerCount === 0) {
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { role: "OWNER" }
-    });
-    // Refresh to pick up the new role
-    redirect("/admin");
+    redirect('/login');
   }
 
   // Prevent ordinary users from accessing the admin panel
-  if (dbUser.role === "USER") {
-    redirect("/"); 
+  if (dbUser.role === 'USER') {
+    redirect('/');
   }
 
   const settings = await prisma.storeSettings.findUnique({
     where: { id: 1 },
   });
   const collections = await prisma.collection.findMany({
-    orderBy: { name: "asc" },
+    orderBy: { name: 'asc' },
     select: { id: true, name: true, slug: true },
   });
 
@@ -67,7 +63,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 className="h-8 w-auto object-contain"
               />
             ) : (
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Admin Panel</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                Admin Panel
+              </h2>
             )}
           </div>
           <div className="text-sm font-medium px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-200 rounded-full inline-block">
@@ -75,15 +73,24 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-2">
-          <Link href="/admin" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          <Link
+            href="/admin"
+            className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+          >
             <LayoutDashboard className="w-5 h-5" />
             <span>Dashboard</span>
           </Link>
-          <Link href="/admin/products" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          <Link
+            href="/admin/products"
+            className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+          >
             <ShoppingBag className="w-5 h-5" />
             <span>Products</span>
           </Link>
-          <Link href="/admin/collections" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          <Link
+            href="/admin/collections"
+            className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+          >
             <Layers3 className="w-5 h-5" />
             <span>Collections</span>
           </Link>
@@ -100,25 +107,40 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               ))}
             </div>
           )}
-          <Link href="/admin/carousel" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          <Link
+            href="/admin/carousel"
+            className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+          >
             <Images className="w-5 h-5" />
             <span>Carousel</span>
           </Link>
-          <Link href="/admin/orders" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          <Link
+            href="/admin/orders"
+            className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+          >
             <ShoppingCart className="w-5 h-5" />
             <span>Orders</span>
           </Link>
-          {dbUser.role === "OWNER" && (
-            <Link href="/admin/users" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-purple-50 hover:text-purple-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          {dbUser.role === 'OWNER' && (
+            <Link
+              href="/admin/users"
+              className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-purple-50 hover:text-purple-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+            >
               <Users className="w-5 h-5" />
               <span>Team Settings</span>
             </Link>
           )}
-          <Link href="/admin/profile" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          <Link
+            href="/admin/profile"
+            className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+          >
             <ShieldCheck className="w-5 h-5" />
             <span>Security</span>
           </Link>
-          <Link href="/admin/settings" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium">
+          <Link
+            href="/admin/settings"
+            className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"
+          >
             <Settings className="w-5 h-5" />
             <span>Store Settings</span>
           </Link>
@@ -130,13 +152,16 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         {/* Top Navbar */}
         <header className="bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
-             <MobileNav role={dbUser.role} logoUrl={settings?.logoUrl} collections={collections} />
-             <span className="md:hidden font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
-               {settings?.logoUrl ? "Admin" : "Admin Panel"}
-             </span>
+            <MobileNav role={dbUser.role} logoUrl={settings?.logoUrl} collections={collections} />
+            <span className="md:hidden font-bold text-gray-900 dark:text-white truncate max-w-[150px]">
+              {settings?.logoUrl ? 'Admin' : 'Admin Panel'}
+            </span>
           </div>
           <div className="flex items-center space-x-3">
-            <Link href="/" className="flex items-center space-x-2 text-sm text-gray-600 dark:text-zinc-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-zinc-800/70 dark:hover:text-white px-3 py-2 rounded-lg transition-colors font-medium">
+            <Link
+              href="/"
+              className="flex items-center space-x-2 text-sm text-gray-600 dark:text-zinc-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-zinc-800/70 dark:hover:text-white px-3 py-2 rounded-lg transition-colors font-medium"
+            >
               <Home className="w-4 h-4" />
               <span>Go to Store</span>
             </Link>

@@ -1,84 +1,190 @@
-"use server";
+'use server';
 
-import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
-import { OrderStatus } from "@prisma/client";
+import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+import { OrderStatus } from '@prisma/client';
+import { auth } from '@/auth';
 
-export async function updateOrderStatus(orderId: string, status: OrderStatus) {
-  const currentOrder = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { items: true },
-  });
+const ORDER_STATUSES: OrderStatus[] = [
+  'PENDING',
+  'PROCESSING',
+  'SHIPPED',
+  'DELIVERED',
+  'CANCELLED',
+];
 
-  if (!currentOrder) return;
+type GuestContactInfo = {
+  name: string;
+  phone: string;
+  address: string;
+  method: string;
+};
 
-  // Restore inventory if changing to CANCELLED from a non-CANCELLED state
-  if (status === "CANCELLED" && currentOrder.status !== "CANCELLED") {
-    await prisma.$transaction(
-      currentOrder.items.map((item) =>
-        prisma.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        })
-      )
-    );
-  } 
-  // Deduct inventory if changing AWAY from CANCELLED to a valid state
-  else if (currentOrder.status === "CANCELLED" && status !== "CANCELLED") {
-    await prisma.$transaction(
-      currentOrder.items.map((item) =>
-        prisma.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        })
-      )
-    );
+type GuestOrderItemInput = {
+  productId: string;
+  quantity: number;
+};
+
+async function requireOwnerOrAdmin() {
+  const session = await auth();
+
+  if (!session?.user || session.user.role === 'USER') {
+    throw new Error('Unauthorized.');
   }
 
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { status },
-  });
-  revalidatePath("/admin/orders");
+  return session;
 }
 
-export async function placeGuestOrder(
-  contactInfo: { name: string; phone: string; address: string; method: string },
-  items: { productId: string; quantity: number; price: number }[],
-  totalAmount: number
-) {
-  // Save order to database and deduct stock atomically
-  const order = await prisma.$transaction(async (tx) => {
-    const createdOrder = await tx.order.create({
-      data: {
-        userId: null, 
-        guestContactInfo: JSON.stringify(contactInfo),
-        totalAmount,
-        status: "PENDING",
-        items: {
-          create: items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        },
-      },
+function assertOrderStatus(status: OrderStatus) {
+  if (!ORDER_STATUSES.includes(status)) {
+    throw new Error('Invalid order status.');
+  }
+}
+
+function normalizeGuestOrderItems(items: GuestOrderItemInput[]) {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error('Your cart is empty.');
+  }
+
+  const quantityByProductId = new Map<string, number>();
+
+  for (const item of items) {
+    const productId = typeof item.productId === 'string' ? item.productId.trim() : '';
+    const quantity = Number(item.quantity);
+
+    if (!productId || !Number.isInteger(quantity) || quantity <= 0) {
+      throw new Error('Invalid cart item.');
+    }
+
+    quantityByProductId.set(productId, (quantityByProductId.get(productId) || 0) + quantity);
+  }
+
+  return Array.from(quantityByProductId, ([productId, quantity]) => ({
+    productId,
+    quantity,
+  }));
+}
+
+function normalizeContactInfo(contactInfo: GuestContactInfo) {
+  const name = contactInfo.name?.trim();
+  const phone = contactInfo.phone?.trim();
+  const address = contactInfo.address?.trim();
+  const method = contactInfo.method === 'viber' ? 'viber' : 'telegram';
+
+  if (!name || !phone || !address) {
+    throw new Error('Name, phone, and address are required.');
+  }
+
+  return { name, phone, address, method };
+}
+
+export async function updateOrderStatus(orderId: string, status: OrderStatus) {
+  await requireOwnerOrAdmin();
+  assertOrderStatus(status);
+
+  await prisma.$transaction(async (tx) => {
+    const currentOrder = await tx.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
     });
 
-    // Bulk update stock to minimize round trips inside transaction
-    await Promise.all(
-      items.map((item) =>
-        tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        })
-      )
-    );
+    if (!currentOrder) {
+      throw new Error('Order not found.');
+    }
 
-    return createdOrder;
-  }, {
-    timeout: 15000, // Increase transaction timeout to 15 seconds
+    if (status === 'CANCELLED' && currentOrder.status !== 'CANCELLED') {
+      await Promise.all(
+        currentOrder.items.map((item) =>
+          tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          })
+        )
+      );
+    } else if (currentOrder.status === 'CANCELLED' && status !== 'CANCELLED') {
+      for (const item of currentOrder.items) {
+        const result = await tx.product.updateMany({
+          where: { id: item.productId, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        });
+
+        if (result.count !== 1) {
+          throw new Error('Insufficient stock to restore this order status.');
+        }
+      }
+    }
+
+    await tx.order.update({
+      where: { id: orderId },
+      data: { status },
+    });
   });
+
+  revalidatePath('/admin/orders');
+}
+
+export async function placeGuestOrder(contactInfo: GuestContactInfo, items: GuestOrderItemInput[]) {
+  const normalizedContactInfo = normalizeContactInfo(contactInfo);
+  const normalizedItems = normalizeGuestOrderItems(items);
+
+  const order = await prisma.$transaction(
+    async (tx) => {
+      const products = await tx.product.findMany({
+        where: { id: { in: normalizedItems.map((item) => item.productId) } },
+        select: { id: true, name: true, price: true, stock: true },
+      });
+      const productById = new Map(products.map((product) => [product.id, product]));
+
+      if (products.length !== normalizedItems.length) {
+        throw new Error('A product in your cart is no longer available.');
+      }
+
+      for (const item of normalizedItems) {
+        const product = productById.get(item.productId);
+
+        if (!product || product.stock < item.quantity) {
+          throw new Error(`${product?.name || 'A product'} does not have enough stock.`);
+        }
+      }
+
+      const totalAmount = normalizedItems.reduce((total, item) => {
+        const product = productById.get(item.productId);
+        return total + item.quantity * (product?.price || 0);
+      }, 0);
+
+      const createdOrder = await tx.order.create({
+        data: {
+          userId: null,
+          guestContactInfo: JSON.stringify(normalizedContactInfo),
+          totalAmount,
+          status: 'PENDING',
+          items: {
+            create: normalizedItems.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              price: productById.get(item.productId)?.price || 0,
+            })),
+          },
+        },
+      });
+
+      for (const item of normalizedItems) {
+        const result = await tx.product.updateMany({
+          where: { id: item.productId, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        });
+
+        if (result.count !== 1) {
+          throw new Error('Insufficient stock. Please refresh your cart and try again.');
+        }
+      }
+
+      return createdOrder;
+    },
+    {
+      timeout: 15000,
+    }
+  );
 
   // Fetch settings for Telegram and Viber URLs
   const settings = await prisma.storeSettings.findUnique({
@@ -86,16 +192,16 @@ export async function placeGuestOrder(
   });
 
   // Build the message text
-  const text = `🛒 New Order: ${order.id}\n👤 Name: ${contactInfo.name}\n📞 Phone: ${contactInfo.phone}\n📍 Address: ${contactInfo.address}\n💰 Total: ${totalAmount} Ks`;
+  const text = `New Order: ${order.id}\nName: ${normalizedContactInfo.name}\nPhone: ${normalizedContactInfo.phone}\nAddress: ${normalizedContactInfo.address}\nTotal: ${order.totalAmount} Ks`;
   const encodedText = encodeURIComponent(text);
 
-  let redirectUrl = "/";
+  let redirectUrl = '/';
 
-  if (contactInfo.method === "telegram" && settings?.telegramUrl) {
+  if (normalizedContactInfo.method === 'telegram' && settings?.telegramUrl) {
     // Basic formatting for telegram `https://t.me/bot?text=hello`
-    const baseUrl = settings.telegramUrl.split("?")[0];
+    const baseUrl = settings.telegramUrl.split('?')[0];
     redirectUrl = `${baseUrl}?text=${encodedText}`;
-  } else if (contactInfo.method === "viber" && settings?.viberUrl) {
+  } else if (normalizedContactInfo.method === 'viber' && settings?.viberUrl) {
     // Viber deep links vary by platform; we store a working URL in settings and redirect to it.
     redirectUrl = settings.viberUrl;
   } else {

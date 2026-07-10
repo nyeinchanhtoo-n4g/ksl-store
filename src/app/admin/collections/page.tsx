@@ -1,10 +1,6 @@
-import { prisma } from "@/lib/prisma";
-import {
-  createCollection,
-  deleteCollection,
-  updateCollection,
-} from "@/actions/admin.actions";
-import type { Prisma } from "@prisma/client";
+import { prisma } from '@/lib/prisma';
+import { createCollection, deleteCollection, updateCollection } from '@/actions/admin.actions';
+import type { Prisma } from '@prisma/client';
 
 type CollectionWithCount = Prisma.CollectionGetPayload<{
   include: {
@@ -21,7 +17,7 @@ export default async function CollectionsPage() {
         select: { products: true },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: { createdAt: 'desc' },
   });
 
   return (
@@ -29,7 +25,8 @@ export default async function CollectionsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Collections</h1>
         <p className="mt-2 text-sm text-gray-600 dark:text-zinc-300">
-          Create product groups using the name `Collection` and organize how items appear on the storefront.
+          Create product groups using the name `Collection` and organize how items appear on the
+          storefront.
         </p>
       </div>
 
@@ -73,7 +70,10 @@ export default async function CollectionsPage() {
                 key={collection.id}
                 className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
               >
-                <form action={updateAction} className="grid gap-4 lg:grid-cols-[1fr_2fr_auto_auto] lg:items-start">
+                <form
+                  action={updateAction}
+                  className="grid gap-4 lg:grid-cols-[1fr_2fr_auto_auto] lg:items-start"
+                >
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-zinc-300">
                       Name
@@ -97,7 +97,7 @@ export default async function CollectionsPage() {
                     <textarea
                       name="description"
                       rows={3}
-                      defaultValue={collection.description || ""}
+                      defaultValue={collection.description || ''}
                       className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                     />
                   </div>

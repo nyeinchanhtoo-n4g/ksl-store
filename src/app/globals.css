@@ -1,6 +1,13 @@
-@import url('https://mmwebfonts.comquas.com/fonts/?font=pyidaungsu');
-@import "tailwindcss";
+@import 'tailwindcss';
 @variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: 'Pyidaungsu';
+  src: url('/fonts/Pyidaungsu-2.5.3_Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --background: #ffffff;
@@ -15,14 +22,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Pyidaungsu", var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Pyidaungsu', Arial, Helvetica, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Pyidaungsu", Arial, Helvetica, sans-serif;
+  font-family: 'Pyidaungsu', Arial, Helvetica, sans-serif;
 }
 
 /* Normalize browser autofill (prevents "black input" look) */
@@ -50,7 +57,7 @@ select:-webkit-autofill:hover {
 nextjs-portal {
   display: none !important;
 }
-#__next-build-watcher, [id^="__next-build-watcher"] {
+#__next-build-watcher,
+[id^='__next-build-watcher'] {
   display: none !important;
 }
-

@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
-import HomeCarousel from "@/components/storefront/HomeCarousel";
-import ProductCard from "@/components/storefront/ProductCard";
-import Link from "next/link";
-import type { CarouselSlide, Prisma, Product } from "@prisma/client";
+import { prisma } from '@/lib/prisma';
+import HomeCarousel from '@/components/storefront/HomeCarousel';
+import ProductCard from '@/components/storefront/ProductCard';
+import Link from 'next/link';
+import type { CarouselSlide, Prisma, Product } from '@prisma/client';
 
 type ProductWithCollection = Prisma.ProductGetPayload<{
   include: { collection: true };
@@ -16,26 +16,26 @@ export default async function HomePage(props: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const searchParams = props.searchParams ? await props.searchParams : {};
-  const isOrderSuccess = searchParams?.orderSuccess === "true";
+  const isOrderSuccess = searchParams?.orderSuccess === 'true';
 
   const [products, collections, slides] = await Promise.all([
     prisma.product.findMany({
       include: { collection: true },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: 24,
     }),
     prisma.collection.findMany({
       include: {
         products: {
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
           take: 8,
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { createdAt: 'desc' },
     }),
     prisma.carouselSlide.findMany({
       where: { isActive: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
       take: 8,
     }),
   ]);
@@ -50,10 +50,10 @@ export default async function HomePage(props: {
       ? typedSlides.map((slide) => ({
           id: slide.id,
           title: slide.title,
-          description: slide.subtitle || "Discover our latest curated arrivals.",
+          description: slide.subtitle || 'Discover our latest curated arrivals.',
           imageUrl: slide.imageUrl,
-          buttonText: slide.buttonText || "Explore Now",
-          buttonHref: slide.buttonHref || "#products",
+          buttonText: slide.buttonText || 'Explore Now',
+          buttonHref: slide.buttonHref || '#products',
         }))
       : typedProducts
           .filter((product) => product.imageUrl)
@@ -63,7 +63,7 @@ export default async function HomePage(props: {
             title: product.name,
             description: product.description,
             imageUrl: product.imageUrl!,
-            buttonText: "Shop This Item",
+            buttonText: 'Shop This Item',
             buttonHref: `/products/${product.id}`,
             meta: `${product.price.toLocaleString()} Ks`,
           }));
@@ -71,9 +71,7 @@ export default async function HomePage(props: {
   const populatedCollections = typedCollections.filter(
     (collection) => collection.products.length > 0
   );
-  const unassignedProducts: Product[] = typedProducts.filter(
-    (product) => !product.collectionId
-  );
+  const unassignedProducts: Product[] = typedProducts.filter((product) => !product.collectionId);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -87,11 +85,23 @@ export default async function HomePage(props: {
               <div className="mb-10 p-5 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-2xl max-w-2xl mx-auto shadow-sm">
                 <div className="flex items-center space-x-4 text-green-800 dark:text-green-300">
                   <div className="bg-green-100 dark:bg-green-800/50 p-2.5 rounded-full flex-shrink-0">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.5"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-lg dark:text-green-100">Order Placed Successfully!</h3>
-                    <p className="text-sm mt-0.5 opacity-90">Thank you for your purchase. We&apos;ve received your order and will contact you shortly.</p>
+                    <h3 className="font-bold text-lg dark:text-green-100">
+                      Order Placed Successfully!
+                    </h3>
+                    <p className="text-sm mt-0.5 opacity-90">
+                      Thank you for your purchase. We&apos;ve received your order and will contact
+                      you shortly.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -106,7 +116,8 @@ export default async function HomePage(props: {
               </span>
             </h1>
             <p className="mx-auto max-w-2xl text-xl text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
-              Experience the finest selection of premium gadgets, watches, and accessories meticulously curated for the modern individual.
+              Experience the finest selection of premium gadgets, watches, and accessories
+              meticulously curated for the modern individual.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
@@ -154,7 +165,9 @@ export default async function HomePage(props: {
 
           {products.length === 0 ? (
             <div className="p-12 text-center bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-sm">
-              <p className="text-gray-500 dark:text-gray-400">No products available yet. Run the seeder to populate realistic data.</p>
+              <p className="text-gray-500 dark:text-gray-400">
+                No products available yet. Run the seeder to populate realistic data.
+              </p>
             </div>
           ) : (
             <div className="space-y-20">
