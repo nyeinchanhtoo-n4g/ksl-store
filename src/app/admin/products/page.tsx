@@ -192,7 +192,10 @@ export default async function ProductsManagementPage(props: {
                             >
                               <Edit2 className="w-5 h-5" />
                             </Link>
-                            <DeleteProductButton productId={product.id} />
+                            <DeleteProductButton
+                              productId={product.id}
+                              productName={product.name}
+                            />
                           </div>
                         </td>
                       </tr>
