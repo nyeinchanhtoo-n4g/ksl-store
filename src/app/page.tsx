@@ -132,9 +132,9 @@ export default async function HomePage(props: {
       )}
 
       {/* Featured Products */}
-      <section id="products" className="py-24 bg-gray-50 dark:bg-zinc-900/50">
+      <section id="products" className="bg-gray-50 py-14 dark:bg-zinc-900/50 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-left mb-16">
+          <div className="mb-10 text-left sm:mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl relative inline-block">
               Shop By Collection
               <div className="absolute -bottom-3 left-0 w-1/3 h-1 bg-blue-600 rounded-full"></div>
