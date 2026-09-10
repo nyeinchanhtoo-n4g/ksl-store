@@ -1,5 +1,22 @@
 import { z } from "zod";
 
+const allowedImageHosts = new Set(["images.unsplash.com", "res.cloudinary.com"]);
+
+function isAllowedImageUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && allowedImageHosts.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+const imageUrlSchema = z
+  .string()
+  .trim()
+  .url("Invalid image URL")
+  .refine(isAllowedImageUrl, "Use an HTTPS image from Unsplash or Cloudinary");
+
 // Auth schemas
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email("Invalid email address"),
@@ -27,9 +44,13 @@ export const changePasswordSchema = z
 export const productSchema = z.object({
   name: z.string().trim().min(1, "Product name is required"),
   description: z.string().trim().min(1, "Description is required"),
-  price: z.coerce.number().positive("Price must be positive"),
+  price: z.coerce.number().int("Price must be a whole Kyat amount").positive("Price must be positive"),
+  originalPrice: z
+    .union([z.literal(""), z.coerce.number().int("Original price must be a whole Kyat amount").nonnegative("Original price must not be negative")])
+    .transform((value) => (value === "" ? null : value)),
   stock: z.coerce.number().int().min(0, "Stock must be non-negative"),
-  imageUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  imageUrl: imageUrlSchema.optional().or(z.literal("")),
+  collectionId: z.string().trim().optional().or(z.literal("")),
 });
 
 // Order schemas
@@ -51,8 +72,31 @@ export const orderItemSchema = z.object({
 
 // Settings schemas
 export const settingsSchema = z.object({
-  telegramUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
-  viberUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  logoUrl: imageUrlSchema.optional().or(z.literal("")),
+  faviconUrl: imageUrlSchema.optional().or(z.literal("")),
+  telegramUrl: z.string().trim().url("Invalid Telegram URL").refine((value) => {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === "t.me";
+  }, "Use an HTTPS t.me URL").optional().or(z.literal("")),
+  viberUrl: z.string().trim().url("Invalid Viber URL").refine((value) => {
+    const url = new URL(value);
+    return url.protocol === "viber:";
+  }, "Use a viber:// URL").optional().or(z.literal("")),
+});
+
+export const carouselSlideSchema = z.object({
+  title: z.string().trim().min(1, "Slide title is required").max(160),
+  subtitle: z.string().trim().max(1_000).optional().or(z.literal("")),
+  imageUrl: imageUrlSchema,
+  buttonText: z.string().trim().max(80).optional().or(z.literal("")),
+  buttonHref: z
+    .string()
+    .trim()
+    .refine((value) => value === "" || value.startsWith("/") || value.startsWith("#"), "Button link must be an internal path or page anchor")
+    .optional()
+    .or(z.literal("")),
+  sortOrder: z.coerce.number().int().min(0).max(10_000),
+  isActive: z.boolean(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

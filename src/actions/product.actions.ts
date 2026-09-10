@@ -1,37 +1,18 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
+import { requireAdmin } from "@/lib/authorization";
+import { productSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createProduct(formData: FormData) {
-  const session = await auth();
-  if (!session?.user || session.user.role === "USER") {
-    throw new Error("Unauthorized access.");
-  }
-
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const price = parseFloat(formData.get("price") as string);
-  const originalPriceRaw = formData.get("originalPrice") as string | null;
-  const originalPrice =
-    originalPriceRaw && originalPriceRaw.trim().length > 0
-      ? parseFloat(originalPriceRaw)
-      : null;
-  const stock = parseInt(formData.get("stock") as string, 10);
-  const imageUrl = formData.get("imageUrl") as string | null;
-  const collectionId = (formData.get("collectionId") as string) || null;
+  await requireAdmin();
+  const product = parseProductFormData(formData);
 
   await prisma.product.create({
     data: {
-      name,
-      description,
-      price,
-      originalPrice: originalPrice !== null && !isNaN(originalPrice) ? originalPrice : null,
-      stock: isNaN(stock) ? 0 : stock,
-      imageUrl: imageUrl || null,
-      collectionId,
+      ...product,
     }
   });
 
@@ -41,33 +22,13 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(productId: string, formData: FormData) {
-  const session = await auth();
-  if (!session?.user || session.user.role === "USER") {
-    throw new Error("Unauthorized access.");
-  }
-
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const price = parseFloat(formData.get("price") as string);
-  const originalPriceRaw = formData.get("originalPrice") as string | null;
-  const originalPrice =
-    originalPriceRaw && originalPriceRaw.trim().length > 0
-      ? parseFloat(originalPriceRaw)
-      : null;
-  const stock = parseInt(formData.get("stock") as string, 10);
-  const imageUrl = formData.get("imageUrl") as string | null;
-  const collectionId = (formData.get("collectionId") as string) || null;
+  await requireAdmin();
+  const product = parseProductFormData(formData);
 
   await prisma.product.update({
     where: { id: productId },
     data: {
-      name,
-      description,
-      price,
-      originalPrice: originalPrice !== null && !isNaN(originalPrice) ? originalPrice : null,
-      stock: isNaN(stock) ? 0 : stock,
-      imageUrl: imageUrl || null,
-      collectionId,
+      ...product,
     }
   });
 
@@ -77,14 +38,22 @@ export async function updateProduct(productId: string, formData: FormData) {
 }
 
 export async function deleteProduct(productId: string) {
-  const session = await auth();
-  if (!session?.user || session.user.role === "USER") {
-    throw new Error("Unauthorized access.");
-  }
+  await requireAdmin();
 
   await prisma.product.delete({
     where: { id: productId }
   });
 
   revalidatePath("/admin/products");
+}
+
+function parseProductFormData(formData: FormData) {
+  const parsed = productSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0].message);
+  }
+
+  const { imageUrl, collectionId, ...product } = parsed.data;
+  return { ...product, imageUrl: imageUrl || null, collectionId: collectionId || null };
 }

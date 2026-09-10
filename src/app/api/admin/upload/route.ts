@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { requireAdmin } from '@/lib/authorization';
 import {
   buildCloudinarySignature,
   getCloudinaryUploadAuth,
@@ -12,9 +12,9 @@ const UPLOAD_FOLDER = 'ksl-store';
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
 export async function POST(request: Request) {
-  const session = await auth();
-
-  if (!session?.user || session.user.role === 'USER') {
+  try {
+    await requireAdmin();
+  } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

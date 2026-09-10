@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { OrderStatus } from '@prisma/client';
-import { auth } from '@/auth';
+import { requireAdmin } from '@/lib/authorization';
 
 const ORDER_STATUSES: OrderStatus[] = [
   'PENDING',
@@ -26,16 +26,6 @@ type GuestOrderItemInput = {
   productId: string;
   quantity: number;
 };
-
-async function requireOwnerOrAdmin() {
-  const session = await auth();
-
-  if (!session?.user || session.user.role === 'USER') {
-    throw new Error('Unauthorized.');
-  }
-
-  return session;
-}
 
 function assertOrderStatus(status: OrderStatus) {
   if (!ORDER_STATUSES.includes(status)) {
@@ -97,7 +87,7 @@ function normalizeContactInfo(contactInfo: GuestContactInfo) {
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
-  await requireOwnerOrAdmin();
+  await requireAdmin();
   assertOrderStatus(status);
 
   await prisma.$transaction(async (tx) => {

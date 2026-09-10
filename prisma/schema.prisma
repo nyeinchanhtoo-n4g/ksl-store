@@ -79,8 +79,8 @@ model Product {
   id          String   @id @default(cuid())
   name        String
   description String   @db.Text
-  price       Float
-  originalPrice Float?
+  price       Int
+  originalPrice Int?
   stock       Int      @default(0)
   imageUrl    String?
   collectionId String?
@@ -117,7 +117,7 @@ model Order {
   id                String      @id @default(cuid())
   userId            String?     // nullable for guest checkout
   guestContactInfo  String?     // store stringified JSON or plain text for guests
-  totalAmount       Float
+  totalAmount       Int
   status            OrderStatus @default(PENDING)
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
@@ -130,7 +130,7 @@ model OrderItem {
   orderId   String
   productId String
   quantity  Int
-  price     Float
+  price     Int
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
 }

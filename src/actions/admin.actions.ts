@@ -1,18 +1,9 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
+import { requireAdmin, requireOwner } from "@/lib/authorization";
+import { carouselSlideSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
-
-async function requireOwnerOrAdmin() {
-  const session = await auth();
-
-  if (!session?.user || session.user.role === "USER") {
-    throw new Error("Unauthorized.");
-  }
-
-  return session;
-}
 
 function slugify(value: string) {
   return value
@@ -24,11 +15,7 @@ function slugify(value: string) {
 }
 
 export async function updateUserRole(userId: string, newRole: "USER" | "ADMIN" | "OWNER") {
-  const session = await auth();
-  
-  if (!session?.user || session.user.role !== "OWNER") {
-    throw new Error("Unauthorized: Only an OWNER can modify roles.");
-  }
+  await requireOwner();
 
   await prisma.user.update({
     where: { id: userId },
@@ -39,7 +26,7 @@ export async function updateUserRole(userId: string, newRole: "USER" | "ADMIN" |
 }
 
 export async function createCollection(formData: FormData) {
-  await requireOwnerOrAdmin();
+  await requireAdmin();
 
   const name = (formData.get("name") as string)?.trim();
   const description = ((formData.get("description") as string) || "").trim();
@@ -61,7 +48,7 @@ export async function createCollection(formData: FormData) {
 }
 
 export async function updateCollection(collectionId: string, formData: FormData) {
-  await requireOwnerOrAdmin();
+  await requireAdmin();
 
   const name = (formData.get("name") as string)?.trim();
   const description = ((formData.get("description") as string) || "").trim();
@@ -85,7 +72,7 @@ export async function updateCollection(collectionId: string, formData: FormData)
 }
 
 export async function deleteCollection(collectionId: string) {
-  await requireOwnerOrAdmin();
+  await requireAdmin();
 
   await prisma.collection.delete({
     where: { id: collectionId },
@@ -97,29 +84,12 @@ export async function deleteCollection(collectionId: string) {
 }
 
 export async function createCarouselSlide(formData: FormData) {
-  await requireOwnerOrAdmin();
-
-  const title = (formData.get("title") as string)?.trim();
-  const subtitle = ((formData.get("subtitle") as string) || "").trim();
-  const imageUrl = (formData.get("imageUrl") as string)?.trim();
-  const buttonText = ((formData.get("buttonText") as string) || "").trim();
-  const buttonHref = ((formData.get("buttonHref") as string) || "").trim();
-  const sortOrder = parseInt((formData.get("sortOrder") as string) || "0", 10);
-  const isActive = formData.get("isActive") === "on";
-
-  if (!title || !imageUrl) {
-    throw new Error("Slide title and image URL are required.");
-  }
+  await requireAdmin();
+  const slide = parseCarouselSlideFormData(formData);
 
   await prisma.carouselSlide.create({
     data: {
-      title,
-      subtitle: subtitle || null,
-      imageUrl,
-      buttonText: buttonText || null,
-      buttonHref: buttonHref || null,
-      sortOrder: isNaN(sortOrder) ? 0 : sortOrder,
-      isActive,
+      ...slide,
     },
   });
 
@@ -128,30 +98,13 @@ export async function createCarouselSlide(formData: FormData) {
 }
 
 export async function updateCarouselSlide(slideId: string, formData: FormData) {
-  await requireOwnerOrAdmin();
-
-  const title = (formData.get("title") as string)?.trim();
-  const subtitle = ((formData.get("subtitle") as string) || "").trim();
-  const imageUrl = (formData.get("imageUrl") as string)?.trim();
-  const buttonText = ((formData.get("buttonText") as string) || "").trim();
-  const buttonHref = ((formData.get("buttonHref") as string) || "").trim();
-  const sortOrder = parseInt((formData.get("sortOrder") as string) || "0", 10);
-  const isActive = formData.get("isActive") === "on";
-
-  if (!title || !imageUrl) {
-    throw new Error("Slide title and image URL are required.");
-  }
+  await requireAdmin();
+  const slide = parseCarouselSlideFormData(formData);
 
   await prisma.carouselSlide.update({
     where: { id: slideId },
     data: {
-      title,
-      subtitle: subtitle || null,
-      imageUrl,
-      buttonText: buttonText || null,
-      buttonHref: buttonHref || null,
-      sortOrder: isNaN(sortOrder) ? 0 : sortOrder,
-      isActive,
+      ...slide,
     },
   });
 
@@ -160,7 +113,7 @@ export async function updateCarouselSlide(slideId: string, formData: FormData) {
 }
 
 export async function deleteCarouselSlide(slideId: string) {
-  await requireOwnerOrAdmin();
+  await requireAdmin();
 
   await prisma.carouselSlide.delete({
     where: { id: slideId },
@@ -168,4 +121,23 @@ export async function deleteCarouselSlide(slideId: string) {
 
   revalidatePath("/admin/carousel");
   revalidatePath("/");
+}
+
+function parseCarouselSlideFormData(formData: FormData) {
+  const parsed = carouselSlideSchema.safeParse({
+    ...Object.fromEntries(formData.entries()),
+    isActive: formData.get("isActive") === "on",
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0].message);
+  }
+
+  const { subtitle, buttonText, buttonHref, ...slide } = parsed.data;
+  return {
+    ...slide,
+    subtitle: subtitle || null,
+    buttonText: buttonText || null,
+    buttonHref: buttonHref || null,
+  };
 }
