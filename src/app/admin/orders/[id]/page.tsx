@@ -83,7 +83,7 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {item.product?.name || 'Unknown Product'}
+                      {item.product?.name || item.itemName || 'Unknown Product'}
                     </p>
                     {item.product && (
                       <Link
@@ -114,25 +114,25 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
               <div>
                 <dt className="text-gray-500 dark:text-zinc-400">Name</dt>
                 <dd className="mt-1 font-medium text-gray-900 dark:text-white">
-                  {contact.name || order.user?.name || 'N/A'}
+                  {order.customerName || contact.name || order.user?.name || 'N/A'}
                 </dd>
               </div>
               <div>
                 <dt className="text-gray-500 dark:text-zinc-400">Phone</dt>
                 <dd className="mt-1 font-medium text-gray-900 dark:text-white">
-                  {contact.phone || 'N/A'}
+                  {order.customerPhone || contact.phone || 'N/A'}
                 </dd>
               </div>
               <div>
                 <dt className="text-gray-500 dark:text-zinc-400">Contact method</dt>
                 <dd className="mt-1 font-medium uppercase text-gray-900 dark:text-white">
-                  {contact.method || 'N/A'}
+                  {order.customerAccount || contact.method || 'N/A'}
                 </dd>
               </div>
               <div>
                 <dt className="text-gray-500 dark:text-zinc-400">Address</dt>
                 <dd className="mt-1 whitespace-pre-wrap font-medium text-gray-900 dark:text-white">
-                  {contact.address || 'N/A'}
+                  {order.deliveryAddress || contact.address || 'N/A'}
                 </dd>
               </div>
               {order.user?.email && (
@@ -145,6 +145,8 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
               )}
             </dl>
           </section>
+
+          {order.isManual && <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manual Order Details</h2><dl className="mt-5 space-y-4 text-sm"><div><dt className="text-gray-500 dark:text-zinc-400">Leather</dt><dd className="mt-1 font-medium">{order.leather || 'Not set'}</dd></div><div><dt className="text-gray-500 dark:text-zinc-400">Deposit</dt><dd className="mt-1 font-medium">{order.deposit?.toLocaleString() || '0'} Ks</dd></div><div><dt className="text-gray-500 dark:text-zinc-400">Deli Charge</dt><dd className="mt-1 font-medium">{order.deliveryCharge?.toLocaleString() || '0'} Ks</dd></div><div><dt className="text-gray-500 dark:text-zinc-400">Delivery date</dt><dd className="mt-1 font-medium">{order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'Not set'}</dd></div><div><dt className="text-gray-500 dark:text-zinc-400">Setup note</dt><dd className="mt-1 whitespace-pre-wrap font-medium">{order.setupNote || 'None'}</dd></div>{order.attachmentUrls && <div><dt className="text-gray-500 dark:text-zinc-400">Attachments</dt><dd className="mt-1 space-y-1 break-all font-medium">{order.attachmentUrls.split('\n').map((url) => <a key={url} href={url} target="_blank" rel="noreferrer" className="block text-blue-600 hover:underline dark:text-blue-400">View image</a>)}</dd></div>}</dl></section>}
 
           <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Summary</h2>

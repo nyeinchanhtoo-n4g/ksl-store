@@ -2,8 +2,10 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { OrderStatus } from '@prisma/client';
 import { requireAdmin } from '@/lib/authorization';
+import { manualOrderSchema } from '@/lib/validations';
 
 const ORDER_STATUSES: OrderStatus[] = [
   'PENDING',
@@ -102,17 +104,17 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
 
     if (status === 'CANCELLED' && currentOrder.status !== 'CANCELLED') {
       await Promise.all(
-        currentOrder.items.map((item) =>
+        currentOrder.items.filter((item) => item.productId).map((item) =>
           tx.product.update({
-            where: { id: item.productId },
+            where: { id: item.productId! },
             data: { stock: { increment: item.quantity } },
           })
         )
       );
     } else if (currentOrder.status === 'CANCELLED' && status !== 'CANCELLED') {
-      for (const item of currentOrder.items) {
+      for (const item of currentOrder.items.filter((item) => item.productId)) {
         const result = await tx.product.updateMany({
-          where: { id: item.productId, stock: { gte: item.quantity } },
+          where: { id: item.productId!, stock: { gte: item.quantity } },
           data: { stock: { decrement: item.quantity } },
         });
 
@@ -129,6 +131,16 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   });
 
   revalidatePath('/admin/orders');
+}
+
+export async function createManualOrder(formData: FormData) {
+  await requireAdmin();
+  const parsed = manualOrderSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success) throw new Error(parsed.error.issues[0].message);
+  const data = parsed.data;
+  const order = await prisma.order.create({ data: { isManual: true, customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount, items: { create: { itemName: data.itemName, quantity: data.quantity, price: data.price } } } });
+  revalidatePath('/admin/orders');
+  redirect(`/admin/orders/${order.id}`);
 }
 
 export async function placeGuestOrder(contactInfo: GuestContactInfo, items: GuestOrderItemInput[]) {

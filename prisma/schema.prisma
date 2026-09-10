@@ -23,6 +23,13 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum ProfitLossPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
 // NextAuth Next.js Requirements
 model Account {
   id                 String  @id @default(cuid())
@@ -119,6 +126,17 @@ model Order {
   guestContactInfo  String?     // store stringified JSON or plain text for guests
   totalAmount       Int
   status            OrderStatus @default(PENDING)
+  isManual          Boolean     @default(false)
+  customerName      String?
+  customerAccount   String?
+  customerPhone     String?
+  leather           String?
+  deposit           Int?
+  deliveryCharge    Int?
+  deliveryAddress   String?     @db.Text
+  deliveryDate      DateTime?
+  setupNote         String?     @db.Text
+  attachmentUrls    String?     @db.Text
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   user              User?       @relation(fields: [userId], references: [id])
@@ -128,11 +146,55 @@ model Order {
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
-  productId String
+  productId String?
+  itemName  String?
   quantity  Int
   price     Int
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model SalesStatementEntry {
+  id             String   @id @default(cuid())
+  date           DateTime
+  waybillNo      String?
+  receiverName   String?
+  productName    String
+  toCity         String?
+  price          Int?
+  prepayment     Int?
+  deliCharge     Int?      @map("devCharge")
+  codCharge      Int?
+  codAmount      Int?
+  closingBalance Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ExpenseStatementEntry {
+  id            String   @id @default(cuid())
+  date          DateTime
+  productName   String
+  cost          Int?
+  quantity      Int?
+  totalCost     Int?
+  deliCharge    Int?      @map("devCharge")
+  closingAmount Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ProfitLossSummary {
+  id            String           @id @default(cuid())
+  period        ProfitLossPeriod
+  startDate     DateTime
+  endDate       DateTime
+  salesAmount   Int?
+  expenseAmount Int?
+  profitLoss    Int?
+  note          String?          @db.Text
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
 
 model StoreSettings {

@@ -99,6 +99,21 @@ export const carouselSlideSchema = z.object({
   isActive: z.boolean(),
 });
 
+const money = z.union([z.literal(""), z.coerce.number().int().nonnegative()]).transform((value) => value === "" ? null : value);
+
+export const manualOrderSchema = z.object({
+  customerName: z.string().trim().min(2).max(80), customerAccount: z.string().trim().max(120).optional().or(z.literal("")),
+  customerPhone: z.string().trim().max(30).optional().or(z.literal("")), deliveryAddress: z.string().trim().max(500).optional().or(z.literal("")),
+  itemName: z.string().trim().min(1).max(160), leather: z.string().trim().max(160).optional().or(z.literal("")),
+  price: z.coerce.number().int().positive(), quantity: z.coerce.number().int().positive(), totalAmount: z.coerce.number().int().nonnegative(),
+  deposit: money, deliveryCharge: money,
+  deliveryDate: z.string().trim().optional().or(z.literal("")), setupNote: z.string().trim().max(1_000).optional().or(z.literal("")), attachmentUrls: z.string().trim().max(4_000).optional().or(z.literal("")),
+});
+
+export const salesStatementSchema = z.object({ date: z.string().min(1), waybillNo: z.string().trim().max(100).optional().or(z.literal("")), receiverName: z.string().trim().max(120).optional().or(z.literal("")), productName: z.string().trim().min(1).max(160), toCity: z.string().trim().max(120).optional().or(z.literal("")), price: money, prepayment: money, deliCharge: money, codCharge: money, codAmount: money, closingBalance: money });
+export const expenseStatementSchema = z.object({ date: z.string().min(1), productName: z.string().trim().min(1).max(160), cost: money, quantity: z.union([z.literal(""), z.coerce.number().int().nonnegative()]).transform((value) => value === "" ? null : value), totalCost: money, deliCharge: money, closingAmount: money });
+export const profitLossSummarySchema = z.object({ period: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]), startDate: z.string().min(1), endDate: z.string().min(1), salesAmount: money, expenseAmount: money, profitLoss: money, note: z.string().trim().max(1_000).optional().or(z.literal("")) });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type ProductInput = z.infer<typeof productSchema>;

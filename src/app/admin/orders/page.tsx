@@ -18,7 +18,7 @@ export default async function AdminOrdersPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Orders Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Orders Management</h1><Link href="/admin/orders/new" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Create Order</Link>
       </div>
 
       <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden">
@@ -98,11 +98,11 @@ export default async function AdminOrdersPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                         <div className="font-medium text-gray-900 dark:text-white">
-                          {contact.name}
+                          {order.customerName || contact.name}
                         </div>
-                        <div>{contact.phone}</div>
+                        <div>{order.customerPhone || contact.phone}</div>
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-200 uppercase mt-1">
-                          {contact.method || 'N/A'}
+                          {order.customerAccount || contact.method || 'N/A'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
@@ -115,7 +115,7 @@ export default async function AdminOrdersPage() {
                         <div className="flex flex-col items-end gap-1">
                           {order.items.map((item) => (
                             <div key={item.id} className="text-xs">
-                              {item.quantity}x {item.product?.name || 'Unknown Product'}
+                              {item.quantity}x {item.product?.name || item.itemName || 'Unknown Product'}
                             </div>
                           ))}
                         </div>
