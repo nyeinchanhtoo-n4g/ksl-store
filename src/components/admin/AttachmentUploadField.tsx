@@ -4,9 +4,9 @@ import Image from "next/image";
 import { Loader2, Upload, X } from "lucide-react";
 import { ChangeEvent, useRef, useState } from "react";
 
-export default function AttachmentUploadField() {
+export default function AttachmentUploadField({ initialUrls = "" }: { initialUrls?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [urls, setUrls] = useState<string[]>([]);
+  const [urls, setUrls] = useState<string[]>(() => initialUrls.split("\n").map((url) => url.trim()).filter(Boolean));
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 

@@ -59,9 +59,7 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
             <ArrowLeft className="h-4 w-4" />
             Back to orders
           </Link>
-          <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">
-            Order #{order.id.slice(0, 8)}
-          </h1>
+          <h1 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Order Details</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
             Placed on {new Date(order.createdAt).toLocaleString()}
           </p>
@@ -98,6 +96,7 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
                   <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
                     {item.quantity} x {item.price.toLocaleString()} Ks
                   </p>
+                  {(item.description || item.product?.description) && <p className="mt-2 whitespace-pre-wrap text-sm text-gray-500 dark:text-zinc-400">{item.description || item.product?.description}</p>}
                 </div>
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">
                   {(item.quantity * item.price).toLocaleString()} Ks

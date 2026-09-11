@@ -17,6 +17,7 @@ enum Role {
 
 enum OrderStatus {
   PENDING
+  COMPLETE
   PROCESSING
   SHIPPED
   DELIVERED
@@ -148,6 +149,7 @@ model OrderItem {
   orderId   String
   productId String?
   itemName  String?
+  description String? @db.Text
   quantity  Int
   price     Int
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)

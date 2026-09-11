@@ -1,7 +1,8 @@
 import OrderStatusSelect from './OrderStatusSelect';
 import { prisma } from '@/lib/prisma';
-import { Eye } from 'lucide-react';
+import { Eye, Pencil } from 'lucide-react';
 import Link from 'next/link';
+import OrderDeleteButton from './OrderDeleteButton';
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
@@ -33,12 +34,6 @@ export default async function AdminOrdersPage() {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider"
                   >
-                    Order ID
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider"
-                  >
                     Date
                   </th>
                   <th
@@ -46,6 +41,18 @@ export default async function AdminOrdersPage() {
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider"
                   >
                     Customer Contact
+                  </th>
+                  <th
+                    scope="col"
+                    className="w-40 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider"
+                  >
+                    Items
+                  </th>
+                  <th
+                    scope="col"
+                    className="min-w-[360px] px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider"
+                  >
+                    Address
                   </th>
                   <th
                     scope="col"
@@ -63,19 +70,13 @@ export default async function AdminOrdersPage() {
                     scope="col"
                     className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider"
                   >
-                    Items
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider"
-                  >
                     Action
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-zinc-900 divide-y divide-gray-200 dark:divide-zinc-800">
                 {orders.map((order) => {
-                  let contact = { name: 'N/A', phone: 'N/A', method: 'N/A' };
+                  let contact = { name: 'N/A', phone: 'N/A', method: 'N/A', address: '' };
                   try {
                     contact = JSON.parse(order.guestContactInfo || '{}');
                   } catch {}
@@ -85,16 +86,9 @@ export default async function AdminOrdersPage() {
                       key={order.id}
                       className="hover:bg-gray-50 dark:hover:bg-zinc-800/40 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                        <Link
-                          href={`/admin/orders/${order.id}`}
-                          className="hover:text-blue-600 dark:hover:text-blue-400"
-                        >
-                          {order.id.slice(0, 8)}...
-                        </Link>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+                        <div className="text-xs">{new Date(order.createdAt).toLocaleTimeString()}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                         <div className="font-medium text-gray-900 dark:text-white">
@@ -105,29 +99,31 @@ export default async function AdminOrdersPage() {
                           {order.customerAccount || contact.method || 'N/A'}
                         </span>
                       </td>
+                      <td className="w-40 max-w-40 px-6 py-4 text-sm text-gray-500 dark:text-zinc-400 text-right">
+                        <div className="flex flex-col items-end gap-1">
+                          {order.items.map((item) => (
+                            <div key={item.id} className="max-w-32 text-xs">
+                              <span className="block truncate">{item.quantity}x {item.product?.name || item.itemName || 'Unknown Product'}</span>
+                              {(item.description || item.product?.description) && <span className="block truncate text-gray-400">{item.description || item.product?.description}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="min-w-[360px] px-6 py-4 text-sm text-gray-500 dark:text-zinc-400">
+                        <div className="max-w-xl whitespace-pre-wrap break-words">{order.deliveryAddress || contact.address || 'N/A'}</div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
                         {order.totalAmount.toLocaleString()} Ks
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <OrderStatusSelect orderId={order.id} currentStatus={order.status} />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400 text-right">
-                        <div className="flex flex-col items-end gap-1">
-                          {order.items.map((item) => (
-                            <div key={item.id} className="text-xs">
-                              {item.quantity}x {item.product?.name || item.itemName || 'Unknown Product'}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                        <Link
-                          href={`/admin/orders/${order.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 font-medium text-blue-600 transition hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-500/10"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View
-                        </Link>
+                        <div className="flex justify-end gap-1">
+                          <Link href={`/admin/orders/${order.id}`} aria-label="View order" className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 font-medium text-blue-600 transition hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10"><Eye className="h-4 w-4" /></Link>
+                          {order.isManual && <Link href={`/admin/orders/${order.id}/edit`} aria-label="Edit order" className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 font-medium text-amber-600 transition hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10"><Pencil className="h-4 w-4" /></Link>}
+                          <OrderDeleteButton orderId={order.id} />
+                        </div>
                       </td>
                     </tr>
                   );

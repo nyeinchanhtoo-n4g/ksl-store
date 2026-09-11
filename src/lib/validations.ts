@@ -104,7 +104,7 @@ const money = z.union([z.literal(""), z.coerce.number().int().nonnegative()]).tr
 export const manualOrderSchema = z.object({
   customerName: z.string().trim().min(2).max(80), customerAccount: z.string().trim().max(120).optional().or(z.literal("")),
   customerPhone: z.string().trim().max(30).optional().or(z.literal("")), deliveryAddress: z.string().trim().max(500).optional().or(z.literal("")),
-  itemName: z.string().trim().min(1).max(160), leather: z.string().trim().max(160).optional().or(z.literal("")),
+  itemName: z.string().trim().min(1).max(160), description: z.string().trim().max(1_000).optional().or(z.literal("")), leather: z.string().trim().max(160).optional().or(z.literal("")),
   price: z.coerce.number().int().positive(), quantity: z.coerce.number().int().positive(), totalAmount: z.coerce.number().int().nonnegative(),
   deposit: money, deliveryCharge: money,
   deliveryDate: z.string().trim().optional().or(z.literal("")), setupNote: z.string().trim().max(1_000).optional().or(z.literal("")), attachmentUrls: z.string().trim().max(4_000).optional().or(z.literal("")),

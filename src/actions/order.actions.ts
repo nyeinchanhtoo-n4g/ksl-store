@@ -9,10 +9,7 @@ import { manualOrderSchema } from '@/lib/validations';
 
 const ORDER_STATUSES: OrderStatus[] = [
   'PENDING',
-  'PROCESSING',
-  'SHIPPED',
-  'DELIVERED',
-  'CANCELLED',
+  'COMPLETE' as OrderStatus,
 ];
 const CONTACT_METHODS = new Set(['telegram', 'viber']);
 const PHONE_PATTERN = /^[+\d][\d\s-]{5,24}$/;
@@ -102,28 +99,6 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
       throw new Error('Order not found.');
     }
 
-    if (status === 'CANCELLED' && currentOrder.status !== 'CANCELLED') {
-      await Promise.all(
-        currentOrder.items.filter((item) => item.productId).map((item) =>
-          tx.product.update({
-            where: { id: item.productId! },
-            data: { stock: { increment: item.quantity } },
-          })
-        )
-      );
-    } else if (currentOrder.status === 'CANCELLED' && status !== 'CANCELLED') {
-      for (const item of currentOrder.items.filter((item) => item.productId)) {
-        const result = await tx.product.updateMany({
-          where: { id: item.productId!, stock: { gte: item.quantity } },
-          data: { stock: { decrement: item.quantity } },
-        });
-
-        if (result.count !== 1) {
-          throw new Error('Insufficient stock to restore this order status.');
-        }
-      }
-    }
-
     await tx.order.update({
       where: { id: orderId },
       data: { status },
@@ -138,9 +113,38 @@ export async function createManualOrder(formData: FormData) {
   const parsed = manualOrderSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) throw new Error(parsed.error.issues[0].message);
   const data = parsed.data;
-  const order = await prisma.order.create({ data: { isManual: true, customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount, items: { create: { itemName: data.itemName, quantity: data.quantity, price: data.price } } } });
+  const order = await prisma.order.create({ data: { isManual: true, customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount, items: { create: { itemName: data.itemName, description: data.description || null, quantity: data.quantity, price: data.price } } } });
   revalidatePath('/admin/orders');
   redirect(`/admin/orders/${order.id}`);
+}
+
+export async function updateManualOrder(formData: FormData) {
+  await requireAdmin();
+  const orderId = String(formData.get('orderId') || '');
+  const parsed = manualOrderSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!orderId || !parsed.success) throw new Error(parsed.success ? 'Order not found.' : parsed.error.issues[0].message);
+
+  const data = parsed.data;
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: { orderBy: { id: 'asc' }, take: 1 } } });
+  if (!order || !order.isManual || !order.items[0]) throw new Error('Only manual orders can be edited.');
+
+  await prisma.$transaction([
+    prisma.order.update({ where: { id: orderId }, data: { customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount } }),
+    prisma.orderItem.update({ where: { id: order.items[0].id }, data: { itemName: data.itemName, description: data.description || null, quantity: data.quantity, price: data.price } }),
+  ]);
+
+  revalidatePath('/admin/orders');
+  revalidatePath(`/admin/orders/${orderId}`);
+  redirect(`/admin/orders/${orderId}`);
+}
+
+export async function deleteOrder(orderId: string) {
+  await requireAdmin();
+  const order = await prisma.order.findUnique({ where: { id: orderId }, select: { id: true } });
+  if (!order) throw new Error('Order not found.');
+  await prisma.order.delete({ where: { id: orderId } });
+  revalidatePath('/admin/orders');
+  redirect('/admin/orders');
 }
 
 export async function placeGuestOrder(contactInfo: GuestContactInfo, items: GuestOrderItemInput[]) {
