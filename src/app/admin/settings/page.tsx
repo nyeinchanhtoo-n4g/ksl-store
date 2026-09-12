@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { updateStoreSettings } from "@/actions/settings.actions";
 import ImageUploadField from "@/components/admin/ImageUploadField";
+import SubmitButton from "@/components/admin/SubmitButton";
 
 export default async function SettingsPage() {
   const settings = await prisma.storeSettings.findUnique({
@@ -78,12 +79,12 @@ export default async function SettingsPage() {
           </div>
 
           <div className="pt-4 flex justify-end">
-            <button
-              type="submit"
+            <SubmitButton
+              pendingLabel="Saving..."
               className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
             >
               Save Settings
-            </button>
+            </SubmitButton>
           </div>
         </form>
       </div>

@@ -7,6 +7,7 @@ import {
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import type { CarouselSlide } from "@prisma/client";
 import Image from "next/image";
+import SubmitButton from "@/components/admin/SubmitButton";
 
 export default async function CarouselManagementPage() {
   const slides: CarouselSlide[] = await prisma.carouselSlide.findMany({
@@ -71,12 +72,12 @@ export default async function CarouselManagementPage() {
             <input type="checkbox" name="isActive" defaultChecked />
             Active slide
           </label>
-          <button
-            type="submit"
+          <SubmitButton
+            pendingLabel="Adding..."
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 lg:col-span-2"
           >
             Add Slide
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -154,21 +155,21 @@ export default async function CarouselManagementPage() {
                     <input type="checkbox" name="isActive" defaultChecked={slide.isActive} />
                     Active slide
                   </label>
-                  <button
-                    type="submit"
+                  <SubmitButton
+                    pendingLabel="Saving..."
                     className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
                   >
                     Save Slide
-                  </button>
+                  </SubmitButton>
                 </form>
 
                 <form action={deleteAction} className="mt-3">
-                  <button
-                    type="submit"
+                  <SubmitButton
+                    pendingLabel="Deleting..."
                     className="rounded-lg bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
                   >
                     Delete Slide
-                  </button>
+                  </SubmitButton>
                 </form>
               </div>
             );

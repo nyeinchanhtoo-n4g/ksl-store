@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { createCollection, deleteCollection, updateCollection } from '@/actions/admin.actions';
 import type { Prisma } from '@prisma/client';
+import SubmitButton from '@/components/admin/SubmitButton';
 
 type CollectionWithCount = Prisma.CollectionGetPayload<{
   include: {
@@ -46,12 +47,12 @@ export default async function CollectionsPage() {
             placeholder="Short description (optional)"
             className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
           />
-          <button
-            type="submit"
+          <SubmitButton
+            pendingLabel="Adding..."
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
           >
             Add
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -102,21 +103,21 @@ export default async function CollectionsPage() {
                     />
                   </div>
 
-                  <button
-                    type="submit"
+                  <SubmitButton
+                    pendingLabel="Saving..."
                     className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
                   >
                     Save
-                  </button>
+                  </SubmitButton>
                 </form>
 
                 <form action={deleteAction} className="mt-3">
-                  <button
-                    type="submit"
+                  <SubmitButton
+                    pendingLabel="Deleting..."
                     className="rounded-lg bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-100 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
                   >
                     Delete Collection
-                  </button>
+                  </SubmitButton>
                 </form>
               </div>
             );
