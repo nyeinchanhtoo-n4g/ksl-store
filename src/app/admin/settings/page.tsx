@@ -68,12 +68,12 @@ export default async function SettingsPage() {
                 name="viberUrl"
                 id="viberUrl"
                 defaultValue={viberUrl}
-                placeholder="viber://chat?number=959xxxxxxxxx"
+                placeholder="https://viber.me/959xxxxxxxxx or viber://chat?number=959xxxxxxxxx"
                 className="block w-full rounded-lg border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-800/80 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 sm:text-sm py-2.5 px-3"
               />
             </div>
             <p className="mt-2 text-sm text-gray-600 dark:text-zinc-400">
-              Where guest checkout orders will redirect for Viber contact.
+              Use an HTTPS Viber share/public link for browser compatibility, or a viber:// link when the Viber app is installed.
             </p>
           </div>
 

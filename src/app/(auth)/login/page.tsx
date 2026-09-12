@@ -4,11 +4,13 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { LogIn, Mail, Lock, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,7 +35,8 @@ export default function LoginPage() {
           setSuccess(true);
           // Force a full page reload to the home page to ensure all server components 
           // and the layout pick up the new session state immediately.
-          window.location.href = "/";
+          router.push("/");
+          router.refresh();
         }
       } catch (err) {
         console.error("Login error:", err);

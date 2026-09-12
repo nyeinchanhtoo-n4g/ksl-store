@@ -29,7 +29,8 @@ export default function EditProductForm({
             Original Price (Ks)
           </label>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             name="originalPrice"
             id="originalPrice"
             defaultValue={product.originalPrice ?? ""}
@@ -42,7 +43,8 @@ export default function EditProductForm({
             Sale Price (Ks)
           </label>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             name="price"
             id="price"
             defaultValue={product.price}
@@ -53,7 +55,7 @@ export default function EditProductForm({
         </div>
         <div>
           <label htmlFor="stock" className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Stock</label>
-          <input type="number" name="stock" id="stock" defaultValue={product.stock} min="0" required className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white" />
+          <input type="text" inputMode="numeric" name="stock" id="stock" defaultValue={product.stock} min="0" required className="mt-1 block w-full rounded-md border-gray-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border bg-white dark:bg-zinc-800 text-gray-900 dark:text-white" />
         </div>
       </div>
 

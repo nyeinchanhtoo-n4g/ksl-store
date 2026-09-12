@@ -112,6 +112,7 @@ export default function Navbar({ logoUrl, collections = [] }: NavbarProps) {
                 alt="Store Logo"
                 width={160}
                 height={32}
+                style={{ width: "auto", height: "32px" }}
                 className="h-8 w-auto object-contain"
               />
             ) : (
@@ -238,6 +239,7 @@ export default function Navbar({ logoUrl, collections = [] }: NavbarProps) {
                     alt="Store Logo"
                     width={200}
                     height={40}
+                    style={{ width: "auto", height: "40px" }}
                     className="h-8 w-auto sm:h-10 object-contain"
                   />
                 ) : (
@@ -256,6 +258,7 @@ export default function Navbar({ logoUrl, collections = [] }: NavbarProps) {
                     alt="Store Logo"
                     width={160}
                     height={32}
+                    style={{ width: "auto", height: "32px" }}
                     className="h-8 w-auto object-contain"
                   />
                 ) : (

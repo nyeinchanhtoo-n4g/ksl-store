@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Layers3,
   Images,
-  ClipboardPlus,
   WalletCards,
   ChartNoAxesCombined,
 } from 'lucide-react';
@@ -63,6 +62,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 alt="Logo"
                 width={160}
                 height={32}
+                style={{ width: "auto", height: "32px" }}
                 className="h-8 w-auto object-contain"
               />
             ) : (
@@ -124,7 +124,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <ShoppingCart className="w-5 h-5" />
             <span>Orders</span>
           </Link>
-          <Link href="/admin/orders/new" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"><ClipboardPlus className="w-5 h-5" /><span>Create Order</span></Link>
           <Link href="/admin/sales" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"><WalletCards className="w-5 h-5" /><span>Sales Statement</span></Link>
           <Link href="/admin/expenses" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"><WalletCards className="w-5 h-5" /><span>Expense Statement</span></Link>
           <Link href="/admin/profit-loss" className="flex items-center space-x-3 text-gray-700 dark:text-zinc-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-zinc-800/70 dark:hover:text-white p-3 rounded-lg transition-colors font-medium"><ChartNoAxesCombined className="w-5 h-5" /><span>Profit & Loss</span></Link>

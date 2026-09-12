@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { OrderStatus } from '@prisma/client';
 import { requireAdmin } from '@/lib/authorization';
-import { manualOrderSchema } from '@/lib/validations';
+import { manualOrderSchema, normalizeMyanmarDigits } from '@/lib/validations';
+import { buildTelegramUrl, buildViberUrl } from '@/lib/contact-links';
 
 const ORDER_STATUSES: OrderStatus[] = [
   'PENDING',
@@ -41,7 +42,7 @@ function normalizeGuestOrderItems(items: GuestOrderItemInput[]) {
 
   for (const item of items) {
     const productId = typeof item.productId === 'string' ? item.productId.trim() : '';
-    const quantity = Number(item.quantity);
+    const quantity = Number(normalizeMyanmarDigits(String(item.quantity)));
 
     if (!productId || !Number.isInteger(quantity) || quantity <= 0) {
       throw new Error('Invalid cart item.');
@@ -126,10 +127,17 @@ export async function updateManualOrder(formData: FormData) {
 
   const data = parsed.data;
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: { orderBy: { id: 'asc' }, take: 1 } } });
-  if (!order || !order.isManual || !order.items[0]) throw new Error('Only manual orders can be edited.');
+  if (!order || !order.items[0]) throw new Error('Order not found.');
+
+  const guestContactInfo = order.isManual ? undefined : JSON.stringify({
+    name: data.customerName,
+    phone: data.customerPhone || '',
+    address: data.deliveryAddress || '',
+    method: (data.customerAccount || '').toLowerCase(),
+  });
 
   await prisma.$transaction([
-    prisma.order.update({ where: { id: orderId }, data: { customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount } }),
+    prisma.order.update({ where: { id: orderId }, data: { customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, guestContactInfo, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount } }),
     prisma.orderItem.update({ where: { id: order.items[0].id }, data: { itemName: data.itemName, description: data.description || null, quantity: data.quantity, price: data.price } }),
   ]);
 
@@ -215,19 +223,45 @@ export async function placeGuestOrder(contactInfo: GuestContactInfo, items: Gues
     where: { id: 1 },
   });
 
-  // Build the message text
-  const text = `New Order: ${order.id}\nName: ${normalizedContactInfo.name}\nPhone: ${normalizedContactInfo.phone}\nAddress: ${normalizedContactInfo.address}\nTotal: ${order.totalAmount} Ks`;
-  const encodedText = encodeURIComponent(text);
+  const orderDetails = await prisma.order.findUnique({
+    where: { id: order.id },
+    select: {
+      id: true,
+      totalAmount: true,
+      items: {
+        select: {
+          itemName: true,
+          description: true,
+          quantity: true,
+          price: true,
+          product: { select: { name: true, description: true } },
+        },
+      },
+    },
+  });
+
+  const itemLines = orderDetails?.items.map((item) => {
+    const name = item.itemName || item.product?.name || 'Item';
+    const description = item.description || item.product?.description;
+    return [`- ${name} x${item.quantity} @ ${item.price.toLocaleString()} Ks`, description ? `  Description: ${description}` : ''].filter(Boolean).join('\n');
+  }).join('\n') || '- No item details';
+  const text = [
+    `New Order: ${order.id}`,
+    `Name: ${normalizedContactInfo.name}`,
+    `Phone: ${normalizedContactInfo.phone}`,
+    `Address: ${normalizedContactInfo.address}`,
+    'Items:',
+    itemLines,
+    `Total: ${order.totalAmount.toLocaleString()} Ks`,
+  ].join('\n');
 
   let redirectUrl = '/';
 
   if (normalizedContactInfo.method === 'telegram' && settings?.telegramUrl) {
     // Basic formatting for telegram `https://t.me/bot?text=hello`
-    const baseUrl = settings.telegramUrl.split('?')[0];
-    redirectUrl = `${baseUrl}?text=${encodedText}`;
+    redirectUrl = buildTelegramUrl(settings.telegramUrl, text);
   } else if (normalizedContactInfo.method === 'viber' && settings?.viberUrl) {
-    // Viber deep links vary by platform; we store a working URL in settings and redirect to it.
-    redirectUrl = settings.viberUrl;
+    redirectUrl = buildViberUrl(settings.viberUrl, text);
   } else {
     // Fallback if settings not configured
     redirectUrl = `/order-success/${order.id}`;

@@ -1,11 +1,40 @@
 import { z } from "zod";
 
+const MYANMAR_DIGITS = "၀၁၂၃၄၅၆၇၈၉";
+
+export function normalizeMyanmarDigits(value: unknown) {
+  if (typeof value !== "string") return value;
+  return value.replace(/[၀-၉]/g, (digit) => String(MYANMAR_DIGITS.indexOf(digit)));
+}
+
+const numberInput = () => z.preprocess(normalizeMyanmarDigits, z.coerce.number());
+const wholeNumberInput = () => z.preprocess(normalizeMyanmarDigits, z.coerce.number().int());
+
 const allowedImageHosts = new Set(["images.unsplash.com", "res.cloudinary.com"]);
 
 function isAllowedImageUrl(value: string) {
   try {
     const url = new URL(value);
     return url.protocol === "https:" && allowedImageHosts.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedViberUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.protocol === "viber:") return true;
+    return url.protocol === "https:" && ["vb.me", "viber.me", "viber.com", "www.viber.com", "invite.viber.com"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedTelegramUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === "t.me";
   } catch {
     return false;
   }
@@ -44,11 +73,11 @@ export const changePasswordSchema = z
 export const productSchema = z.object({
   name: z.string().trim().min(1, "Product name is required"),
   description: z.string().trim().min(1, "Description is required"),
-  price: z.coerce.number().int("Price must be a whole Kyat amount").positive("Price must be positive"),
+  price: wholeNumberInput().pipe(z.number().positive("Price must be positive")),
   originalPrice: z
-    .union([z.literal(""), z.coerce.number().int("Original price must be a whole Kyat amount").nonnegative("Original price must not be negative")])
+    .union([z.literal(""), wholeNumberInput().pipe(z.number().nonnegative("Original price must not be negative"))])
     .transform((value) => (value === "" ? null : value)),
-  stock: z.coerce.number().int().min(0, "Stock must be non-negative"),
+  stock: wholeNumberInput().pipe(z.number().min(0, "Stock must be non-negative")),
   imageUrl: imageUrlSchema.optional().or(z.literal("")),
   collectionId: z.string().trim().optional().or(z.literal("")),
 });
@@ -66,22 +95,16 @@ export const guestOrderSchema = z.object({
 
 export const orderItemSchema = z.object({
   productId: z.string(),
-  quantity: z.coerce.number().int().positive("Quantity must be positive"),
-  price: z.coerce.number().positive("Price must be positive"),
+  quantity: wholeNumberInput().pipe(z.number().positive("Quantity must be positive")),
+  price: numberInput().pipe(z.number().positive("Price must be positive")),
 });
 
 // Settings schemas
 export const settingsSchema = z.object({
   logoUrl: imageUrlSchema.optional().or(z.literal("")),
   faviconUrl: imageUrlSchema.optional().or(z.literal("")),
-  telegramUrl: z.string().trim().url("Invalid Telegram URL").refine((value) => {
-    const url = new URL(value);
-    return url.protocol === "https:" && url.hostname === "t.me";
-  }, "Use an HTTPS t.me URL").optional().or(z.literal("")),
-  viberUrl: z.string().trim().url("Invalid Viber URL").refine((value) => {
-    const url = new URL(value);
-    return url.protocol === "viber:";
-  }, "Use a viber:// URL").optional().or(z.literal("")),
+  telegramUrl: z.string().trim().url("Invalid Telegram URL").refine(isAllowedTelegramUrl, "Use an HTTPS t.me URL").optional().or(z.literal("")),
+  viberUrl: z.string().trim().url("Invalid Viber URL").refine(isAllowedViberUrl, "Use a viber:// link or an HTTPS Viber share link").optional().or(z.literal("")),
 });
 
 export const carouselSlideSchema = z.object({
@@ -95,23 +118,23 @@ export const carouselSlideSchema = z.object({
     .refine((value) => value === "" || value.startsWith("/") || value.startsWith("#"), "Button link must be an internal path or page anchor")
     .optional()
     .or(z.literal("")),
-  sortOrder: z.coerce.number().int().min(0).max(10_000),
+  sortOrder: wholeNumberInput().pipe(z.number().min(0).max(10_000)),
   isActive: z.boolean(),
 });
 
-const money = z.union([z.literal(""), z.coerce.number().int().nonnegative()]).transform((value) => value === "" ? null : value);
+const money = z.union([z.literal(""), wholeNumberInput().pipe(z.number().nonnegative())]).transform((value) => value === "" ? null : value);
 
 export const manualOrderSchema = z.object({
   customerName: z.string().trim().min(2).max(80), customerAccount: z.string().trim().max(120).optional().or(z.literal("")),
   customerPhone: z.string().trim().max(30).optional().or(z.literal("")), deliveryAddress: z.string().trim().max(500).optional().or(z.literal("")),
   itemName: z.string().trim().min(1).max(160), description: z.string().trim().max(1_000).optional().or(z.literal("")), leather: z.string().trim().max(160).optional().or(z.literal("")),
-  price: z.coerce.number().int().positive(), quantity: z.coerce.number().int().positive(), totalAmount: z.coerce.number().int().nonnegative(),
+  price: wholeNumberInput().pipe(z.number().positive()), quantity: wholeNumberInput().pipe(z.number().positive()), totalAmount: wholeNumberInput().pipe(z.number().nonnegative()),
   deposit: money, deliveryCharge: money,
   deliveryDate: z.string().trim().optional().or(z.literal("")), setupNote: z.string().trim().max(1_000).optional().or(z.literal("")), attachmentUrls: z.string().trim().max(4_000).optional().or(z.literal("")),
 });
 
 export const salesStatementSchema = z.object({ date: z.string().min(1), waybillNo: z.string().trim().max(100).optional().or(z.literal("")), receiverName: z.string().trim().max(120).optional().or(z.literal("")), productName: z.string().trim().min(1).max(160), toCity: z.string().trim().max(120).optional().or(z.literal("")), price: money, prepayment: money, deliCharge: money, codCharge: money, codAmount: money, closingBalance: money });
-export const expenseStatementSchema = z.object({ date: z.string().min(1), productName: z.string().trim().min(1).max(160), cost: money, quantity: z.union([z.literal(""), z.coerce.number().int().nonnegative()]).transform((value) => value === "" ? null : value), totalCost: money, deliCharge: money, closingAmount: money });
+export const expenseStatementSchema = z.object({ date: z.string().min(1), productName: z.string().trim().min(1).max(160), cost: money, quantity: z.union([z.literal(""), wholeNumberInput().pipe(z.number().nonnegative())]).transform((value) => value === "" ? null : value), totalCost: money, deliCharge: money, closingAmount: money });
 export const profitLossSummarySchema = z.object({ period: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]), startDate: z.string().min(1), endDate: z.string().min(1), salesAmount: money, expenseAmount: money, profitLoss: money, note: z.string().trim().max(1_000).optional().or(z.literal("")) });
 
 export type LoginInput = z.infer<typeof loginSchema>;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LayoutDashboard, ShoppingBag, ShoppingCart, Users, ShieldCheck, Settings, Home, Layers3, Images, ClipboardPlus, WalletCards, ChartNoAxesCombined } from "lucide-react";
+import { Menu, X, LayoutDashboard, ShoppingBag, ShoppingCart, Users, ShieldCheck, Settings, Home, Layers3, Images, WalletCards, ChartNoAxesCombined } from "lucide-react";
 import Image from "next/image";
 
 interface MobileNavProps {
@@ -24,7 +24,6 @@ export default function MobileNav({ role, logoUrl, collections = [] }: MobileNav
     { href: "/admin/collections", label: "Collections", icon: Layers3 },
     { href: "/admin/carousel", label: "Carousel", icon: Images },
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-    { href: "/admin/orders/new", label: "Create Order", icon: ClipboardPlus },
     { href: "/admin/sales", label: "Sales Statement", icon: WalletCards },
     { href: "/admin/expenses", label: "Expense Statement", icon: WalletCards },
     { href: "/admin/profit-loss", label: "Profit & Loss", icon: ChartNoAxesCombined },
@@ -61,6 +60,7 @@ export default function MobileNav({ role, logoUrl, collections = [] }: MobileNav
                 alt="Logo"
                 width={160}
                 height={32}
+                style={{ width: "auto", height: "32px" }}
                 className="h-8 w-auto object-contain"
               />
             ) : (

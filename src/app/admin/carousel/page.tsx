@@ -60,7 +60,8 @@ export default async function CarouselManagementPage() {
             className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
           />
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             name="sortOrder"
             placeholder="Sort order"
             defaultValue={0}
@@ -143,7 +144,8 @@ export default async function CarouselManagementPage() {
                     className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                   />
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="sortOrder"
                     defaultValue={slide.sortOrder}
                     className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"

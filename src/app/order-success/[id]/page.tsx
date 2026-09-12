@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { CheckCircle2, Home, MessageCircle, PackageCheck, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { buildTelegramUrl, buildViberUrl } from '@/lib/contact-links';
 
 type GuestContactInfo = {
   name?: string;
@@ -24,23 +25,28 @@ function buildContactUrl({
   method,
   orderId,
   totalAmount,
+  items,
   settings,
 }: {
   method: string;
   orderId: string;
   totalAmount: number;
+  items: Array<{ itemName: string | null; description: string | null; quantity: number; price: number; product: { name: string; description: string } | null }>;
   settings: { telegramUrl: string | null; viberUrl: string | null } | null;
 }) {
-  const text = `New Order: ${orderId}\nTotal: ${totalAmount} Ks`;
-  const encodedText = encodeURIComponent(text);
+  const itemLines = items.map((item) => {
+    const name = item.itemName || item.product?.name || 'Item';
+    const description = item.description || item.product?.description;
+    return [`- ${name} x${item.quantity} @ ${item.price.toLocaleString()} Ks`, description ? `  Description: ${description}` : ''].filter(Boolean).join('\n');
+  }).join('\n') || '- No item details';
+  const text = [`New Order: ${orderId}`, `Total: ${totalAmount.toLocaleString()} Ks`, 'Items:', itemLines].join('\n');
 
   if (method === 'telegram' && settings?.telegramUrl) {
-    const baseUrl = settings.telegramUrl.split('?')[0];
-    return `${baseUrl}?text=${encodedText}`;
+    return buildTelegramUrl(settings.telegramUrl, text);
   }
 
   if (method === 'viber' && settings?.viberUrl) {
-    return settings.viberUrl;
+    return buildViberUrl(settings.viberUrl, text);
   }
 
   return null;
@@ -57,6 +63,15 @@ export default async function OrderSuccessPage(props: { params: Promise<{ id: st
         totalAmount: true,
         status: true,
         createdAt: true,
+        items: {
+          select: {
+            itemName: true,
+            description: true,
+            quantity: true,
+            price: true,
+            product: { select: { name: true, description: true } },
+          },
+        },
       },
     }),
     prisma.storeSettings.findUnique({
@@ -78,6 +93,7 @@ export default async function OrderSuccessPage(props: { params: Promise<{ id: st
     method,
     orderId: order.id,
     totalAmount: order.totalAmount,
+    items: order.items,
     settings,
   });
 

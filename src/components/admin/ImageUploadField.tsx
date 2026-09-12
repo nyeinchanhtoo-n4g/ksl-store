@@ -105,6 +105,7 @@ export default function ImageUploadField({
             alt={label}
             width={320}
             height={96}
+            style={{ width: "auto", height: "96px" }}
             className="h-24 w-auto max-w-full object-contain"
           />
         </div>
