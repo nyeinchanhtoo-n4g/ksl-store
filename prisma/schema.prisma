@@ -169,6 +169,7 @@ model SalesStatementEntry {
   codCharge      Int?
   codAmount      Int?
   closingBalance Int?
+  note           String?  @db.Text
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -182,6 +183,7 @@ model ExpenseStatementEntry {
   totalCost     Int?
   deliCharge    Int?      @map("devCharge")
   closingAmount Int?
+  note          String?   @db.Text
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

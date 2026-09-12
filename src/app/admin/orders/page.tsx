@@ -4,7 +4,8 @@ import { Eye, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import OrderDeleteButton from './OrderDeleteButton';
 
-function getDueDateLabel(dueDate: Date) {
+function getDueDateLabel(dueDate: Date, status: string) {
+  if (status === 'COMPLETE') return { text: 'တာဝန်ပြီးဆုံးပါပြီ။', className: 'text-blue-600 dark:text-blue-400' };
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const dueStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
@@ -97,7 +98,7 @@ export default async function AdminOrdersPage() {
                         <div>{new Date(order.createdAt).toLocaleDateString()}</div>
                         <div className="mt-2 text-[11px] font-medium uppercase text-gray-400 dark:text-zinc-500">Due Date</div>
                         <div>{order.deliveryDate ? order.deliveryDate.toLocaleDateString() : 'Not set'}</div>
-                        {order.deliveryDate && (() => { const dueDateLabel = getDueDateLabel(order.deliveryDate); return <div className={`mt-1 text-xs font-semibold ${dueDateLabel.className}`}>{dueDateLabel.text}</div>; })()}
+                        {order.deliveryDate && (() => { const dueDateLabel = getDueDateLabel(order.deliveryDate, order.status); return <div className={`mt-1 text-xs font-semibold ${dueDateLabel.className}`}>{dueDateLabel.text}</div>; })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-zinc-400">
                         <div className="font-medium text-gray-900 dark:text-white">
