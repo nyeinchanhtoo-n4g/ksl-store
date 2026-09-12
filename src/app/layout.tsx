@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { NextAuthProvider } from '@/components/providers/NextAuthProvider';
 import { auth } from '@/auth';
 import Script from 'next/script';
+import NavigationLoading from '@/components/NavigationLoading';
 
 import { prisma } from '@/lib/prisma';
 
@@ -56,6 +57,7 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className="min-h-full flex flex-col bg-slate-50 dark:bg-zinc-950 text-gray-900 dark:text-white">
+        <NavigationLoading />
         <NextAuthProvider session={session}>
           <ThemeProvider>
             <Navbar logoUrl={settings?.logoUrl} collections={collections} />

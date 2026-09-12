@@ -53,6 +53,12 @@ select:-webkit-autofill:hover {
   box-shadow: 0 0 0px 1000px var(--background) inset !important;
 }
 
+@keyframes navigation-progress {
+  0% { transform: translateX(-120%); }
+  50% { transform: translateX(140%); }
+  100% { transform: translateX(360%); }
+}
+
 /* Hide Next.js Dev Indicator */
 nextjs-portal {
   display: none !important;
