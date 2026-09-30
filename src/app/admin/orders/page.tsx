@@ -115,6 +115,7 @@ export default async function AdminOrdersPage() {
                             <div key={item.id} className="max-w-56 text-xs">
                               <span className="block truncate">{item.quantity}x {item.product?.name || item.itemName || 'Unknown Product'}</span>
                               {(item.description || item.product?.description) && <span className="block truncate text-gray-400">{item.description || item.product?.description}</span>}
+                              {order.leather && <span className="block break-words text-gray-500 dark:text-zinc-400">Leather: {order.leather}</span>}
                             </div>
                           ))}
                         </div>

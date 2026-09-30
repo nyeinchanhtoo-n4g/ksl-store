@@ -121,13 +121,13 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Customer</h2>
             <dl className="mt-5 space-y-4 text-sm">
               <div>
-                <dt className="text-gray-500 dark:text-zinc-400">Name</dt>
+                <dt className="text-gray-500 dark:text-zinc-400">{order.isManual ? 'Account Name' : 'Name'}</dt>
                 <dd className="mt-1 font-medium text-gray-900 dark:text-white">
                   {order.customerName || contact.name || order.user?.name || 'N/A'}
                 </dd>
               </div>
               <div>
-                <dt className="text-gray-500 dark:text-zinc-400">Phone</dt>
+                <dt className="text-gray-500 dark:text-zinc-400">{order.isManual ? 'Customer Name' : 'Phone'}</dt>
                 <dd className="mt-1 font-medium text-gray-900 dark:text-white">
                   {order.customerPhone || contact.phone || 'N/A'}
                 </dd>
