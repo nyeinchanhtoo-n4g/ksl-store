@@ -1,10 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { normalizeDatabaseUrl } from "./database-url";
 
-const connectionString = `${process.env.DATABASE_URL}`;
+const connectionString = normalizeDatabaseUrl(process.env.DATABASE_URL);
 
-const pool = new Pool({ 
+const pool = new Pool({
   connectionString,
   max: 10,
   idleTimeoutMillis: 30000,

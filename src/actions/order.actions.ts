@@ -114,7 +114,7 @@ export async function createManualOrder(formData: FormData) {
   const parsed = manualOrderSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) throw new Error(parsed.error.issues[0].message);
   const data = parsed.data;
-  const order = await prisma.order.create({ data: { isManual: true, customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount, items: { create: { itemName: data.itemName, description: data.description || null, quantity: data.quantity, price: data.price } } } });
+  const order = await prisma.order.create({ data: { isManual: true, customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, leather: data.leather || null, deposit: data.deposit, extraCharge: data.extraCharge, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount, items: { create: { itemName: data.itemName, description: data.description || null, quantity: data.quantity, price: data.price } } } });
   revalidatePath('/admin/orders');
   redirect(`/admin/orders/${order.id}`);
 }
@@ -137,7 +137,7 @@ export async function updateManualOrder(formData: FormData) {
   });
 
   await prisma.$transaction([
-    prisma.order.update({ where: { id: orderId }, data: { customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, guestContactInfo, leather: data.leather || null, deposit: data.deposit, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount } }),
+    prisma.order.update({ where: { id: orderId }, data: { customerName: data.customerName, customerAccount: data.customerAccount || null, customerPhone: data.customerPhone || null, guestContactInfo, leather: data.leather || null, deposit: data.deposit, extraCharge: data.extraCharge, deliveryCharge: data.deliveryCharge, deliveryAddress: data.deliveryAddress || null, deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null, setupNote: data.setupNote || null, attachmentUrls: data.attachmentUrls || null, totalAmount: data.totalAmount } }),
     prisma.orderItem.update({ where: { id: order.items[0].id }, data: { itemName: data.itemName, description: data.description || null, quantity: data.quantity, price: data.price } }),
   ]);
 

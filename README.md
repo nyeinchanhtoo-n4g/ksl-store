@@ -67,6 +67,12 @@ npx prisma db push
 npx prisma db seed
 ```
 
+For an existing database, the additive Extra Charge update is in
+`prisma/patches/20261016_order_extra_charge.sql`. Apply it once with
+`npx prisma db execute --file prisma/patches/20261016_order_extra_charge.sql`
+before deploying code that reads `Order.extraCharge`. Use a direct database
+connection for schema updates. Existing orders and `setupNote` values are preserved.
+
 5. Development server စတင်ပါ
 ```bash
 npm run dev

@@ -2,6 +2,13 @@
   "name": "h2o-leather",
   "version": "0.1.0",
   "private": true,
+  "allowScripts": {
+    "@prisma/engines@7.10.0": true,
+    "esbuild@0.27.7": true,
+    "fsevents@2.3.3": true,
+    "prisma@7.10.0": true,
+    "unrs-resolver@1.11.1": true
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",

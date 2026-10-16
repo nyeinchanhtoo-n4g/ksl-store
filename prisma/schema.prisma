@@ -133,6 +133,7 @@ model Order {
   customerPhone     String?
   leather           String?
   deposit           Int?
+  extraCharge       Int?
   deliveryCharge    Int?
   deliveryAddress   String?     @db.Text
   deliveryDate      DateTime?

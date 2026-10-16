@@ -129,7 +129,7 @@ export const manualOrderSchema = z.object({
   customerPhone: z.string().trim().max(80).optional().or(z.literal("")), deliveryAddress: z.string().trim().max(500).optional().or(z.literal("")),
   itemName: z.string().trim().min(1).max(160), description: z.string().trim().max(1_000).optional().or(z.literal("")), leather: z.string().trim().max(160).optional().or(z.literal("")),
   price: wholeNumberInput().pipe(z.number().positive()), quantity: wholeNumberInput().pipe(z.number().positive()), totalAmount: wholeNumberInput().pipe(z.number().nonnegative()),
-  deposit: money, deliveryCharge: money,
+  deposit: money, extraCharge: money.optional().transform((value) => value ?? null), deliveryCharge: money,
   deliveryDate: z.string().trim().optional().or(z.literal("")), setupNote: z.string().trim().max(1_000).optional().or(z.literal("")), attachmentUrls: z.string().trim().max(4_000).optional().or(z.literal("")),
 });
 
