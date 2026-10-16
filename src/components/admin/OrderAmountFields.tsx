@@ -7,7 +7,6 @@ const input =
   'mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white';
 
 type InitialAmounts = Partial<OrderAmountInputs> & {
-  quantity?: string;
   totalAmount?: string;
 };
 
@@ -18,6 +17,7 @@ export default function OrderAmountFields({
 }) {
   const [values, setValues] = useState<OrderAmountInputs>(() => ({
     price: initialValues.price ?? '',
+    quantity: initialValues.quantity ?? '',
     deposit: initialValues.deposit ?? '',
     extraCharge: initialValues.extraCharge ?? '',
     deliveryCharge: initialValues.deliveryCharge ?? '',
@@ -51,7 +51,8 @@ export default function OrderAmountFields({
           type="text"
           inputMode="numeric"
           required
-          defaultValue={initialValues.quantity ?? ''}
+          value={values.quantity}
+          onChange={(event) => updateAmount('quantity', event.target.value)}
           className={input}
         />
       </label>
