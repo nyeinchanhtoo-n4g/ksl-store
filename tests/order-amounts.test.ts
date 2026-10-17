@@ -15,24 +15,28 @@ const orderInput = {
   setupNote: 'Existing setup name',
 };
 
-test('order total multiplies only price by quantity before charges and deposit', () => {
-  assert.equal(calculateOrderTotal(orderInput), '288000');
-  assert.equal(calculateOrderTotal({ ...orderInput, quantity: '1' }), '88000');
-  assert.equal(calculateOrderTotal({ ...orderInput, quantity: '2' }), '188000');
+test('order total adds extra and delivery charges and subtracts the deposit', () => {
+  assert.equal(calculateOrderTotal(orderInput), '88000');
+});
+
+test('quantity does not affect the automatic total', () => {
+  for (const quantity of ['', '1', '2', '3', '၁၀']) {
+    const values = { ...orderInput, quantity };
+    assert.equal(calculateOrderTotal(values), '88000');
+  }
 });
 
 test('blank optional charges count as zero and full payment produces zero', () => {
   assert.equal(
-    calculateOrderTotal({ price: '100000', quantity: '1', extraCharge: '', deliveryCharge: '', deposit: '' }),
+    calculateOrderTotal({ price: '100000', extraCharge: '', deliveryCharge: '', deposit: '' }),
     '100000'
   );
   assert.equal(
     calculateOrderTotal({
       price: '100000',
-      quantity: '3',
       extraCharge: '5000',
       deliveryCharge: '3000',
-      deposit: '308000',
+      deposit: '108000',
     }),
     '0'
   );
@@ -42,12 +46,11 @@ test('automatic totals support Myanmar digits', () => {
   assert.equal(
     calculateOrderTotal({
       price: '၁၀၀၀၀၀',
-      quantity: '၃',
       extraCharge: '၅၀၀၀',
       deliveryCharge: '၃၀၀၀',
       deposit: '၂၀၀၀၀',
     }),
-    '288000'
+    '88000'
   );
 });
 
@@ -57,22 +60,16 @@ test('invalid amount input never produces a NaN or rounded total', () => {
   }
 });
 
-test('invalid or empty quantities leave the automatic total blank', () => {
-  for (const quantity of ['', ' ', '0', '-1', '1.5', 'abc', 'Infinity', '9007199254740992']) {
-    assert.equal(calculateOrderTotal({ ...orderInput, quantity }), '');
-  }
-});
-
-test('unsafe multiplied subtotals leave the automatic total blank', () => {
+test('unsafe totals leave the automatic total blank', () => {
   assert.equal(
-    calculateOrderTotal({ ...orderInput, price: '9007199254740991', quantity: '2' }),
+    calculateOrderTotal({ ...orderInput, price: '9007199254740991', deposit: '' }),
     ''
   );
 });
 
 test('overpayment is not silently clamped to another amount', () => {
   assert.equal(
-    calculateOrderTotal({ price: '100', quantity: '1', extraCharge: '', deliveryCharge: '', deposit: '200' }),
+    calculateOrderTotal({ price: '100', extraCharge: '', deliveryCharge: '', deposit: '200' }),
     '-100'
   );
 });
